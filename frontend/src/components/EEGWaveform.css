@@ -1,0 +1,53 @@
+.eeg-container {
+    background: var(--bg-card, #1e293b);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+}
+
+.eeg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.eeg-header h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary, #94a3b8);
+}
+
+.eeg-legend {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.eeg-legend .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.eeg-canvas {
+    width: 100%;
+    height: 240px;
+    display: block;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.5);
+}
+
+[data-theme="light"] .eeg-container {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+[data-theme="light"] .eeg-canvas {
+    background: #fff;
+}

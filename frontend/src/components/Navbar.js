@@ -9,7 +9,7 @@ function Navbar() {
       textAlign: "center",
       fontSize: "20px"
     }}>
-      🧠 Real-time Epileptic Seizure Monitoring System
+      🧠 EpilepsyGuard - Real-time Seizure Monitoring
     </nav>
   );
 }

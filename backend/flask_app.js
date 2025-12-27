@@ -1,9 +1,11 @@
 // ===============================
-// flask_app.js (Node.js Backend)
+// Enhanced flask_app.js (Node.js Backend)
+// with Historical Data and Alert APIs
 // ===============================
 import express from "express";
 import cors from "cors";
 import cassandra from "cassandra-driver";
+import { generateToken, authenticateToken, comparePassword } from "./auth.js";
 
 const app = express();
 app.use(cors());
@@ -22,103 +24,241 @@ client.connect()
   .catch((err) => console.error("❌ Cassandra Connection Error:", err));
 
 // --------------------
-// Utility Functions
+// AUTHENTICATION
 // --------------------
 
-// Sleep hours constant for one session/day
-let constantSleepHours = (Math.random() * 3 + 6).toFixed(1); // 6–9 hours constant
-let lastSleepReset = new Date();
+// User Login
+app.post("/api/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-function resetDailySleepIfNeeded() {
-  const now = new Date();
-  if (now - lastSleepReset >= 24 * 60 * 60 * 1000) {
-    constantSleepHours = (Math.random() * 3 + 6).toFixed(1);
-    lastSleepReset = now;
-    console.log(`🌙 Sleep hours reset for new day: ${constantSleepHours} hrs`);
+    const query = "SELECT * FROM users WHERE username = ?";
+    const result = await client.execute(query, [username], { prepare: true });
+
+    if (result.rowLength === 0) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    const user = result.first();
+    const isMatch = await comparePassword(password, user.password_hash);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid username or password" });
+    }
+
+    const token = generateToken(user);
+    res.json({
+      token,
+      user: {
+        username: user.username,
+        full_name: user.full_name,
+        role: user.role
+      }
+    });
+
+  } catch (err) {
+    console.error("❌ Login Error:", err);
+    res.status(500).json({ message: "Internal Server Error" });
   }
-}
-
-// Generate simulated vitals
-function generateSimulatedData() {
-  resetDailySleepIfNeeded();
-
-  const hr = Math.floor(Math.random() * (140 - 55) + 55);
-  const spo2 = (Math.random() * (100 - 85) + 85).toFixed(2);
-  const temp = (Math.random() * (39 - 36) + 36).toFixed(2);
-  const move = (Math.random() * 4).toFixed(2);
-  const stress = Math.floor(Math.random() * 10) + 1;
-  const glucose = Math.floor(Math.random() * (160 - 65) + 65);
-  const sleep = parseFloat(constantSleepHours);
-  const noise = (Math.random() * (70 - 20) + 20).toFixed(2);
-  const light = (Math.random() * (500 - 100) + 100).toFixed(2);
-  const seizure = Math.random() < 0.2 ? 1 : 0;
-
-  // Risk logic
-  let risk = "Normal";
-  if (hr > 120 || spo2 < 90 || temp > 38.0 || stress > 8 || glucose < 70) {
-    risk = "High";
-  } else if (hr > 100 || stress > 6 || temp > 37.5) {
-    risk = "Moderate";
-  }
-
-  return {
-    patient_id: "patient_1",
-    heart_rate_bpm: hr,
-    spo2_percent: parseFloat(spo2),
-    body_temperature_c: parseFloat(temp),
-    movement_g: parseFloat(move),
-    stress_level: stress,
-    blood_glucose_mgdl: glucose,
-    sleep_hours: sleep,
-    noise_exposure_db: parseFloat(noise),
-    ambient_light_lux: parseFloat(light),
-    seizure_label: seizure,
-    risk_level: risk,
-  };
-}
+});
 
 // --------------------
 // API ROUTES
 // --------------------
 
-app.get("/api/vitals", async (req, res) => {
+// Get latest vital signs for a patient
+app.get("/api/vitals", authenticateToken, async (req, res) => {
   try {
-    const data = generateSimulatedData();
+    const patientId = req.query.patient_id || "P001";
 
     const query = `
-      INSERT INTO vitals_data (
-        patient_id, timestamp, heart_rate_bpm, spo2_percent,
-        body_temperature_c, movement_g, stress_level,
-        blood_glucose_mgdl, sleep_hours, noise_exposure_db,
-        ambient_light_lux, seizure_label, risk_level
-      ) VALUES (?, toTimestamp(now()), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      SELECT * FROM vitals_data 
+      WHERE patient_id = ? 
+      ORDER BY timestamp DESC 
+      LIMIT 1
     `;
 
-    await client.execute(
-      query,
-      [
-        data.patient_id,
-        data.heart_rate_bpm,
-        data.spo2_percent,
-        data.body_temperature_c,
-        data.movement_g,
-        data.stress_level,
-        data.blood_glucose_mgdl,
-        data.sleep_hours,
-        data.noise_exposure_db,
-        data.ambient_light_lux,
-        data.seizure_label,
-        data.risk_level,
-      ],
-      { prepare: true }
-    );
+    const result = await client.execute(query, [patientId], { prepare: true });
 
-    console.table(data);
-    res.json(data);
+    if (result.rowLength > 0) {
+      const row = result.first();
+      const data = {
+        patient_id: row.patient_id,
+        timestamp: row.timestamp,
+        heart_rate_bpm: row.heart_rate_bpm,
+        spo2_percent: row.spo2_percent,
+        body_temperature_c: row.body_temperature_c,
+        movement_g: row.movement_g,
+        stress_level: row.stress_level,
+        blood_glucose_mgdl: row.blood_glucose_mgdl,
+        sleep_hours: row.sleep_hours,
+        noise_exposure_db: row.noise_exposure_db,
+        ambient_light_lux: row.ambient_light_lux,
+        seizure_label: row.seizure_label,
+        risk_level: row.risk_level
+      };
+
+      res.json(data);
+    } else {
+      res.json({ message: "No data available for this patient" });
+    }
+
   } catch (err) {
-    console.error("❌ Error inserting or fetching vitals:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("❌ Error fetching vitals:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
   }
+});
+
+// Get historical data for a patient (last N records)
+app.get("/api/historical", authenticateToken, async (req, res) => {
+  try {
+    const patientId = req.query.patient_id || "P001";
+    const limit = parseInt(req.query.limit) || 100;
+
+    const query = `
+      SELECT * FROM vitals_data 
+      WHERE patient_id = ? 
+      ORDER BY timestamp DESC 
+      LIMIT ?
+    `;
+
+    const result = await client.execute(query, [patientId, limit], { prepare: true });
+
+    const data = result.rows.map(row => ({
+      patient_id: row.patient_id,
+      timestamp: row.timestamp,
+      heart_rate_bpm: row.heart_rate_bpm,
+      spo2_percent: row.spo2_percent,
+      body_temperature_c: row.body_temperature_c,
+      movement_g: row.movement_g,
+      stress_level: row.stress_level,
+      blood_glucose_mgdl: row.blood_glucose_mgdl,
+      sleep_hours: row.sleep_hours,
+      noise_exposure_db: row.noise_exposure_db,
+      ambient_light_lux: row.ambient_light_lux,
+      seizure_label: row.seizure_label,
+      risk_level: row.risk_level
+    }));
+
+    res.json({ count: data.length, data: data.reverse() }); // Reverse to chronological order
+
+  } catch (err) {
+    console.error("❌ Error fetching historical data:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+});
+
+// Get alert history (High and Moderate risk events)
+app.get("/api/alerts", authenticateToken, async (req, res) => {
+  try {
+    const patientId = req.query.patient_id || "P001";
+    const limit = parseInt(req.query.limit) || 50;
+
+    const query = `
+      SELECT * FROM vitals_data 
+      WHERE patient_id = ? 
+      ORDER BY timestamp DESC 
+      LIMIT ?
+    `;
+
+    const result = await client.execute(query, [patientId, limit * 3], { prepare: true });
+
+    // Filter for High and Moderate risk only
+    const alerts = result.rows
+      .filter(row => row.risk_level === "High" || row.risk_level === "Moderate")
+      .slice(0, limit)
+      .map(row => ({
+        timestamp: row.timestamp,
+        risk_level: row.risk_level,
+        heart_rate_bpm: row.heart_rate_bpm,
+        spo2_percent: row.spo2_percent,
+        body_temperature_c: row.body_temperature_c,
+        stress_level: row.stress_level,
+      }));
+
+    res.json({ count: alerts.length, alerts: alerts });
+
+  } catch (err) {
+    console.error("❌ Error fetching alerts:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+});
+
+// Get risk summary statistics
+app.get("/api/statistics", authenticateToken, async (req, res) => {
+  try {
+    const patientId = req.query.patient_id || "patient_1";
+    const days = parseInt(req.query.days) || 7;
+
+    const query = `
+      SELECT risk_level, COUNT(*) as count
+      FROM vitals_data 
+      WHERE patient_id = ? 
+      LIMIT 1000
+    `;
+
+    const result = await client.execute(query, [patientId], { prepare: true });
+
+    // Aggregate risk levels
+    const stats = {
+      Normal: 0,
+      Moderate: 0,
+      High: 0,
+      total: result.rowLength
+    };
+
+    result.rows.forEach(row => {
+      const risk = row.risk_level || "Normal";
+      stats[risk] = (stats[risk] || 0) + 1;
+    });
+
+    res.json(stats);
+
+  } catch (err) {
+    console.error("❌ Error fetching statistics:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+});
+
+// Get list of patients
+app.get("/api/patients", async (req, res) => {
+  try {
+    const query = `SELECT DISTINCT patient_id FROM vitals_data LIMIT 100`;
+    const result = await client.execute(query);
+
+    const patients = result.rows.map(row => row.patient_id);
+    res.json({ count: patients.length, patients: patients });
+
+  } catch (err) {
+    console.error("❌ Error fetching patients:", err);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  }
+});
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    cassandra: client.getState().getConnectedHosts().length > 0 ? "connected" : "disconnected",
+    version: "2.0.0"
+  });
+});
+
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({
+    message: "EpilepsyGuard API Server",
+    version: "2.0.0",
+    endpoints: [
+      "GET /api/vitals?patient_id=patient_1",
+      "GET /api/historical?patient_id=patient_1&limit=100",
+      "GET /api/alerts?patient_id=patient_1&limit=50",
+      "GET /api/statistics?patient_id=patient_1&days=7",
+      "GET /api/patients",
+      "GET /api/health"
+    ]
+  });
 });
 
 // --------------------
@@ -126,5 +266,5 @@ app.get("/api/vitals", async (req, res) => {
 // --------------------
 const PORT = 5000;
 app.listen(PORT, "0.0.0.0", () =>
-  console.log(`🚀 Node.js API Server running at http://127.0.0.1:${PORT}`)
+  console.log(`🚀 EpilepsyGuard API Server v2.0 running at http://127.0.0.1:${PORT}`)
 );
