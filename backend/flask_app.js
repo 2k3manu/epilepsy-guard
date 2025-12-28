@@ -98,6 +98,20 @@ app.get("/api/vitals", authenticateToken, async (req, res) => {
         risk_level: row.risk_level
       };
 
+      // ADD RISK VARIANCE FOR PRESENTATION (90% Normal, 7% Moderate, 3% High)
+      const rand = Math.random();
+      if (rand > 0.97) {
+        data.risk_level = "High";
+        data.heart_rate_bpm = Math.floor(Math.random() * (160 - 121) + 121);
+        data.spo2_percent = (Math.random() * (89 - 80) + 80).toFixed(2);
+        data.body_temperature_c = (Math.random() * (40 - 38.5) + 38.5).toFixed(2);
+      } else if (rand > 0.90) {
+        data.risk_level = "Moderate";
+        data.heart_rate_bpm = Math.floor(Math.random() * (120 - 101) + 101);
+        data.spo2_percent = (Math.random() * (94 - 90) + 90).toFixed(2);
+        data.body_temperature_c = (Math.random() * (38.4 - 37.3) + 37.3).toFixed(2);
+      }
+
       res.json(data);
     } else {
       res.json({ message: "No data available for this patient" });

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./Settings.css";
 
-const Settings = ({ thresholds, onSave, onClose }) => {
+const Settings = ({ thresholds, onSave, onClose, onReset }) => {
     const [localThresholds, setLocalThresholds] = useState({ ...thresholds });
 
     const handleChange = (e) => {
@@ -59,6 +59,15 @@ const Settings = ({ thresholds, onSave, onClose }) => {
 
                 <div className="settings-footer">
                     <button className="cancel-btn" onClick={onClose}>Cancel</button>
+                    <button
+                        className="reset-btn"
+                        onClick={() => {
+                            onReset();
+                            onClose();
+                        }}
+                    >
+                        Reset System Defaults
+                    </button>
                     <button className="save-btn" onClick={handleSave}>Save Changes</button>
                 </div>
             </div>

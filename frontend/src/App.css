@@ -139,6 +139,11 @@ body {
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
 }
 
+/* Hide selector for patients */
+.role-patient .patient-selector {
+  display: none !important;
+}
+
 /* Connection Status */
 .connection-status {
   display: flex;

@@ -1,8 +1,8 @@
-import jsPDF from "jspdf";
-import "jspdf-autotable";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export const generatePatientReport = (patient, history, riskSummary) => {
-    const doc = jsPDF();
+    const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
     // Header
@@ -13,12 +13,12 @@ export const generatePatientReport = (patient, history, riskSummary) => {
     // Patient Info
     doc.setFontSize(12);
     doc.setTextColor(50);
-    doc.text(`Patient ID: ${patient.id}`, 14, 35);
-    doc.text(`Patient Name: ${patient.name}`, 14, 42);
-    doc.text(`Report Date: ${new Date().toLocaleString()}`, 14, 49);
+    doc.text(`Patient ID: ${patient.id} `, 14, 35);
+    doc.text(`Patient Name: ${patient.name} `, 14, 42);
+    doc.text(`Report Date: ${new Date().toLocaleString()} `, 14, 49);
 
     // Risk Summary Table
-    doc.autoTable({
+    autoTable(doc, {
         startY: 60,
         head: [["Risk Level", "Reading Count", "Percentage"]],
         body: Object.entries(riskSummary).map(([level, count]) => {
@@ -32,16 +32,17 @@ export const generatePatientReport = (patient, history, riskSummary) => {
 
     // Vitals History Table
     doc.setFontSize(14);
-    doc.text("Recent Vitals History (Last 20 Readings)", 14, doc.lastAutoTable.finalY + 15);
+    const finalY = (doc).lastAutoTable.finalY;
+    doc.text("Recent Vitals History (Last 20 Readings)", 14, finalY + 15);
 
-    doc.autoTable({
-        startY: doc.lastAutoTable.finalY + 20,
+    autoTable(doc, {
+        startY: finalY + 20,
         head: [["Time", "HR (bpm)", "SpO2 (%)", "Temp (°C)", "Risk"]],
         body: history.map(item => [
             item.time,
             item.heart_rate_bpm,
-            item.spo2_percent.toFixed(1),
-            item.body_temperature_c.toFixed(1),
+            typeof item.spo2_percent === 'number' ? item.spo2_percent.toFixed(1) : item.spo2_percent,
+            typeof item.body_temperature_c === 'number' ? item.body_temperature_c.toFixed(1) : item.body_temperature_c,
             item.risk_level
         ]),
         theme: "grid",

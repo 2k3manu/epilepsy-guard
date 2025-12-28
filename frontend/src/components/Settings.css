@@ -114,3 +114,17 @@
     border-color: #e2e8f0;
     color: #1e293b;
 }
+
+.reset-btn {
+    padding: 0.6rem 1.2rem;
+    background: #ed8936 !important;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.reset-btn:hover {
+    background: #dd6b20;
+}

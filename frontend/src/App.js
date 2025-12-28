@@ -31,11 +31,12 @@ function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [showSettings, setShowSettings] = useState(false);
-  const [thresholds, setThresholds] = useState({
+  const defaultThresholds = {
     hrLimit: 120,
     spo2Limit: 90,
     tempLimit: 38.5
-  });
+  };
+  const [thresholds, setThresholds] = useState(defaultThresholds);
   const alertSound = useRef(null);
 
   // Initialize dark mode from localStorage
@@ -46,16 +47,22 @@ function App() {
       document.documentElement.setAttribute("data-theme", "dark");
     }
 
+    // Session persistence restored
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
-
-    const savedThresholds = localStorage.getItem("thresholds");
-    if (savedThresholds) {
-      setThresholds(JSON.parse(savedThresholds));
-    }
   }, []);
+
+  // Load thresholds for selected patient whenever patient changes
+  useEffect(() => {
+    const savedForPatient = localStorage.getItem(`thresholds_${selectedPatient}`);
+    if (savedForPatient) {
+      setThresholds(JSON.parse(savedForPatient));
+    } else {
+      setThresholds(defaultThresholds);
+    }
+  }, [selectedPatient]);
 
   const handleLogin = (data) => {
     setUser(data.user);
@@ -90,18 +97,112 @@ function App() {
     localStorage.setItem("theme", theme);
   };
 
+  const [debugStatus, setDebugStatus] = useState("Initializing...");
+
+  // Alert management
+  const addAlert = (newAlert) => {
+    setAlerts((prev) => {
+      // Avoid duplicate alerts for same message in short time
+      const isDuplicate = prev.some(a => a.message === newAlert.message);
+      if (isDuplicate) return prev;
+      return [newAlert, ...prev].slice(0, 5);
+    });
+  };
+
+  // Helper to check risk level based on thresholds
+  const checkRiskLevel = (data, limits) => {
+    const hr = parseFloat(data.heart_rate_bpm);
+    const spo2 = parseFloat(data.spo2_percent);
+    const temp = parseFloat(data.body_temperature_c);
+
+    const limitHr = parseFloat(limits.hrLimit);
+    const limitSpo2 = parseFloat(limits.spo2Limit);
+    const limitTemp = parseFloat(limits.tempLimit);
+
+    // 1. Check for Critical (High) Breaches
+    if (hr > limitHr || spo2 < limitSpo2 || temp > limitTemp) {
+      return "High";
+    }
+    // 2. Check for Warning (Moderate) Zones
+    else if (
+      hr > (limitHr - 15) ||
+      spo2 < (limitSpo2 + 3) ||
+      temp > (limitTemp - 0.8)
+    ) {
+      return "Moderate";
+    }
+    return "Normal";
+  };
+
+  const removeAlert = (id) => {
+    setAlerts((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const playAlertSound = () => {
+    if (alertSound.current) {
+      alertSound.current.play().catch(e => console.log("Audio play blocked"));
+    }
+  };
+
+  // Recalculate history and summary when thresholds change (RETROACTIVE FIX)
+  useEffect(() => {
+    if (history.length === 0) return;
+
+    setHistory(prevHistory => {
+      const updatedHistory = prevHistory.map(item => ({
+        ...item,
+        risk_level: checkRiskLevel({
+          heart_rate_bpm: item.heart_rate_bpm,
+          spo2_percent: parseFloat(item.spo2_percent), // Ensure number
+          body_temperature_c: parseFloat(item.body_temperature_c)
+        }, thresholds)
+      }));
+
+      // Update summary based on new history
+      const newSummary = { Normal: 0, Moderate: 0, High: 0 };
+      updatedHistory.forEach(item => {
+        newSummary[item.risk_level] = (newSummary[item.risk_level] || 0) + 1;
+      });
+      setRiskSummary(newSummary);
+
+      return updatedHistory;
+    });
+  }, [thresholds]); // Only run when thresholds change
+
+  // Main data fetching interval
+  useEffect(() => {
+    if (!token) return;
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, [selectedPatient, token, thresholds]); // Added thresholds dependency so interval updates with new values
+
   // Fetch data function
   const fetchData = async () => {
     if (!token) return;
+    setDebugStatus("Fetching data from API...");
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/vitals?patient_id=${selectedPatient}`, {
+      console.log("Fetching from http://localhost:5000/api/vitals...");
+      const res = await fetch(`http://localhost:5000/api/vitals?patient_id=${selectedPatient}`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
       });
-      if (!res.ok) throw new Error("Failed to fetch data");
+      setDebugStatus(`Response status: ${res.status}`);
+      if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
 
       const data = await res.json();
+      setDebugStatus("Data received, updating state...");
+
+      // --- CUSTOM RISK CALCULATION START ---
+      // Override backend risk level based on user's custom thresholds
+      const calculatedRisk = checkRiskLevel(data, thresholds);
+
+      // Apply the calculated risk
+      data.risk_level = calculatedRisk;
+      // --- CUSTOM RISK CALCULATION END ---
+
       setVitals(data);
       setIsConnected(true);
       setError(null);
@@ -168,61 +269,26 @@ function App() {
       }
     } catch (err) {
       console.error("❌ API Fetch Error:", err);
+      setDebugStatus(`Error: ${err.message}`);
       setIsConnected(false);
       setError("Unable to connect to backend API");
     }
   };
 
-  // Alert management
-  const addAlert = (alert) => {
-    setAlerts((prev) => [alert, ...prev.slice(0, 4)]); // Keep max 5 alerts
-  };
-
-  const removeAlert = (id) => {
-    setAlerts((prev) => prev.filter((alert) => alert.id !== id));
-  };
-
-  const playAlertSound = () => {
-    try {
-      if (alertSound.current) {
-        alertSound.current.play();
-      }
-    } catch (err) {
-      console.log("Audio play failed:", err);
-    }
-  };
-
-  // Data fetching effect
-  useEffect(() => {
-    if (!token || !user) return;
-
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, [selectedPatient, token]);
-
-  // Get risk color
+  // Get risk color function for UI
   const getRiskColor = (risk) => {
-    switch (risk) {
-      case "High":
-        return "#f56565";
-      case "Moderate":
-        return "#ed8936";
-      default:
-        return "#48bb78";
-    }
+    const riskUpper = (risk || "").toString().toUpperCase();
+    if (riskUpper === "HIGH") return "#f56565";
+    if (riskUpper === "MODERATE") return "#ed8936";
+    return "#48bb78"; // Normal/Low
   };
 
-  // Get status class
+  // Get status class for UI
   const getStatusClass = (risk) => {
-    switch (risk) {
-      case "High":
-        return "status-high";
-      case "Moderate":
-        return "status-moderate";
-      default:
-        return "status-normal";
-    }
+    const riskUpper = (risk || "").toString().toUpperCase();
+    if (riskUpper === "HIGH") return "status-high";
+    if (riskUpper === "MODERATE") return "status-moderate";
+    return "status-normal"; // Normal/Low
   };
 
   // Authentication check
@@ -236,6 +302,7 @@ function App() {
       <div className="loading-screen">
         <h2>🧠 EpilepsyGuard</h2>
         <p>Initializing real-time monitoring system...</p>
+        <p style={{ fontSize: "0.8rem", color: "#888", marginTop: "10px" }}>Status: {debugStatus}</p>
         <div className="spinner"></div>
       </div>
     );
@@ -268,7 +335,7 @@ function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className={`app-container role-${user?.role?.toLowerCase()}`}>
       {/* Hidden audio element for alerts */}
       <audio ref={alertSound} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2i78OWhUBELUKjj8LdjHAU2kdfy0IkwCCB1xe7doUoSCUyg3/G6chsGKHu98NuZUhELRZ3e8btwIAUpgM3y24o0CBlmu+vopVgTCk6k5O+2YhoFN5HY8s+JMAUBU6Pj7rdkGwU4kdby0IkwCCB1xe7doUoSCUyg3/G6chsGKHu98NuZUhELRZ3e8btwIAUpgM3y24o0CBhmu+vopVgTCk6k5O+2YhoFN5HY8tCJMAggdcXu3aFKEglMoN/xunIbBih7vfDbmVIRC0Wd3vG7cCAFKYDN8tuKNAgYZrvr6KVYE wo OpOTvtmIaBTeR2PLQiTAIIHXF7t2hShIJTKDf8bpyGwYoe73w25lSEQtFnd7xu3AgBSmAzfLbijQIGGa76+ilWBMKTqTk77ZiGgU3kdjy0IkwCCB1xe7doUoSCUyg3/G6ciUIIHXF7t2hShIJTKDf8bpyGwYoe73w25lSEQtFnd7xu3ATrppACUpfgCFKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIkpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4AiSmOAIUpjgCJKY4ArppACUpfh" preload="auto" />
 
@@ -282,7 +349,7 @@ function App() {
               </div>
               <div style={{ fontSize: "0.875rem", opacity: 0.9 }}>
                 {alert.time} | HR: {alert.vitals.hr} bpm | SpO₂:{" "}
-                {alert.vitals.spo2.toFixed(1)}%
+                {typeof alert.vitals.spo2 === 'number' ? alert.vitals.spo2.toFixed(1) : alert.vitals.spo2}%
               </div>
             </div>
             <button className="alert-close" onClick={() => removeAlert(alert.id)}>
@@ -300,6 +367,7 @@ function App() {
               <span>🧠</span>
               EpilepsyGuard
             </h1>
+            {console.log("Current user:", user)}
             {user && (
               <span className="user-badge">
                 {user.role === "doctor" ? "👨‍⚕️" : user.role === "patient" ? "🧑‍🦱" : "👩‍⚕️"} {user.full_name}
@@ -312,15 +380,17 @@ function App() {
               <div className={`status-dot ${isConnected ? "connected" : "disconnected"}`}></div>
               {isConnected ? "Connected" : "Disconnected"}
             </div>
-            <select
-              className="patient-selector"
-              value={selectedPatient}
-              onChange={(e) => setSelectedPatient(e.target.value)}
-            >
-              <option value="P001">Arjun Sharma (P001)</option>
-              <option value="P002">Priya Lakshmi (P002)</option>
-              <option value="P003">Ishaan Verma (P003)</option>
-            </select>
+            {user && user.role?.toLowerCase().trim() !== "patient" && (
+              <select
+                className="patient-selector"
+                value={selectedPatient}
+                onChange={(e) => setSelectedPatient(e.target.value)}
+              >
+                <option value="P001">Arjun Sharma (P001)</option>
+                <option value="P002">Priya Lakshmi (P002)</option>
+                <option value="P003">Ishaan Verma (P003)</option>
+              </select>
+            )}
             <button className="theme-toggle" onClick={toggleDarkMode}>
               {darkMode ? "☀️" : "🌙"}
             </button>
@@ -386,15 +456,15 @@ function App() {
             </div>
             <div className="vital-item">
               <div className="vital-label">🫁 SpO₂</div>
-              <div className="vital-value">{vitals.spo2_percent?.toFixed(1)} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>%</span></div>
+              <div className="vital-value">{typeof vitals.spo2_percent === 'number' ? vitals.spo2_percent.toFixed(1) : vitals.spo2_percent} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>%</span></div>
             </div>
             <div className="vital-item">
               <div className="vital-label">🌡️ Temperature</div>
-              <div className="vital-value">{vitals.body_temperature_c?.toFixed(1)} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>°C</span></div>
+              <div className="vital-value">{typeof vitals.body_temperature_c === 'number' ? vitals.body_temperature_c.toFixed(1) : vitals.body_temperature_c} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>°C</span></div>
             </div>
             <div className="vital-item">
               <div className="vital-label">🦶 Movement</div>
-              <div className="vital-value">{vitals.movement_g?.toFixed(2)} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>g</span></div>
+              <div className="vital-value">{typeof vitals.movement_g === 'number' ? vitals.movement_g.toFixed(2) : vitals.movement_g} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>g</span></div>
             </div>
             <div className="vital-item">
               <div className="vital-label">😤 Stress Level</div>
@@ -406,15 +476,15 @@ function App() {
             </div>
             <div className="vital-item">
               <div className="vital-label">💤 Sleep</div>
-              <div className="vital-value">{vitals.sleep_hours?.toFixed(1)} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>hrs</span></div>
+              <div className="vital-value">{typeof vitals.sleep_hours === 'number' ? vitals.sleep_hours.toFixed(1) : vitals.sleep_hours} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>hrs</span></div>
             </div>
             <div className="vital-item">
               <div className="vital-label">🔊 Noise</div>
-              <div className="vital-value">{vitals.noise_exposure_db?.toFixed(1)} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>dB</span></div>
+              <div className="vital-value">{typeof vitals.noise_exposure_db === 'number' ? vitals.noise_exposure_db.toFixed(1) : vitals.noise_exposure_db} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>dB</span></div>
             </div>
             <div className="vital-item">
               <div className="vital-label">💡 Light</div>
-              <div className="vital-value">{vitals.ambient_light_lux?.toFixed(1)} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>lux</span></div>
+              <div className="vital-value">{typeof vitals.ambient_light_lux === 'number' ? vitals.ambient_light_lux.toFixed(1) : vitals.ambient_light_lux} <span style={{ fontSize: "1rem", fontWeight: "normal" }}>lux</span></div>
             </div>
           </div>
 
@@ -517,8 +587,8 @@ function App() {
               >
                 <p>
                   <strong>{item.time}</strong> — Risk: {item.risk_level} | HR:{" "}
-                  {item.heart_rate_bpm} bpm | SpO₂: {item.spo2_percent?.toFixed(1)}% | Temp:{" "}
-                  {item.body_temperature_c?.toFixed(1)}°C
+                  {item.heart_rate_bpm} bpm | SpO₂: {typeof item.spo2_percent === 'number' ? item.spo2_percent.toFixed(1) : item.spo2_percent}% | Temp:{" "}
+                  {typeof item.body_temperature_c === 'number' ? item.body_temperature_c.toFixed(1) : item.body_temperature_c}°C
                 </p>
               </div>
             ))}
@@ -531,7 +601,12 @@ function App() {
           thresholds={thresholds}
           onSave={(newT) => {
             setThresholds(newT);
-            localStorage.setItem("thresholds", JSON.stringify(newT));
+            // Save specifically for this patient
+            localStorage.setItem(`thresholds_${selectedPatient}`, JSON.stringify(newT));
+          }}
+          onReset={() => {
+            setThresholds(defaultThresholds);
+            localStorage.removeItem(`thresholds_${selectedPatient}`);
           }}
           onClose={() => setShowSettings(false)}
         />
