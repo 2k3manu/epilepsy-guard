@@ -44,3 +44,15 @@ build/
 *.tmp
 test-page.html
 get-pip.py
+
+# Excluded project folders
+Paper/
+Phase 2/
+poster/
+Presentation/
+
+# Temp lock files
+~$*
+
+# Large media files
+*.mp4

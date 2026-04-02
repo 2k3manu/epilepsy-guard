@@ -19,6 +19,7 @@ nohup tools/cassandra/bin/cassandra -R > cassandra.log 2>&1 &
 sleep 25
 echo "[2b/8] Initializing Cassandra Schema..."
 tools/cassandra/bin/cqlsh -f init_schema.cql || echo "Schema requires Cassandra to be fully ready."
+tools/cassandra/bin/cqlsh -f backend/users_schema.cql || echo "Users schema requires Cassandra to be fully ready."
 sleep 2
 
 echo "[3/8] Starting Zookeeper..."

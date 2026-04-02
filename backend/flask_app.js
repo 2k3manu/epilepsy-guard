@@ -8,8 +8,13 @@ import cassandra from "cassandra-driver";
 import { generateToken, authenticateToken, comparePassword } from "./auth.js";
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
+// Simple request logger
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
 
 // Cassandra connection
 const client = new cassandra.Client({
@@ -119,7 +124,7 @@ app.get("/api/vitals", authenticateToken, async (req, res) => {
 
   } catch (err) {
     console.error("❌ Error fetching vitals:", err);
-    res.status(500).json({ message: "Internal Server Error", error: err.message });
+    res.status(500).json({ message: "Internal Server Error", error: err.message, stack: err.stack });
   }
 });
 

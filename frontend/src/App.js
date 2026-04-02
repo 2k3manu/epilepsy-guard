@@ -183,14 +183,20 @@ function App() {
     if (!token) return;
     setDebugStatus("Fetching data from API...");
     try {
-      console.log("Fetching from http://localhost:5000/api/vitals...");
-      const res = await fetch(`http://localhost:5000/api/vitals?patient_id=${selectedPatient}`, {
+      const host = window.location.hostname;
+      console.log(`Fetching from http://${host}:5000/api/vitals...`);
+      const res = await fetch(`http://${host}:5000/api/vitals?patient_id=${selectedPatient}`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
       });
       setDebugStatus(`Response status: ${res.status}`);
-      if (!res.ok) throw new Error(`Failed to fetch data: ${res.status}`);
+      if (res.status === 401 || res.status === 403) {
+        console.warn("🔐 Session expired or invalid token. Redirecting to login...");
+        handleLogout();
+        throw new Error("Session expired. Please log in again.");
+      }
+      if (!res.ok) throw new Error(`Server returned ${res.status}: ${res.statusText}`);
 
       const data = await res.json();
       setDebugStatus("Data received, updating state...");
@@ -271,7 +277,7 @@ function App() {
       console.error("❌ API Fetch Error:", err);
       setDebugStatus(`Error: ${err.message}`);
       setIsConnected(false);
-      setError("Unable to connect to backend API");
+      setError(err.message || "Unable to connect to backend API");
     }
   };
 
@@ -300,7 +306,7 @@ function App() {
   if (!vitals && !error) {
     return (
       <div className="loading-screen">
-        <h2>🧠 EpilepsyGuard</h2>
+        <h2>🧠 EpilepsyGuard v2.1</h2>
         <p>Initializing real-time monitoring system...</p>
         <p style={{ fontSize: "0.8rem", color: "#888", marginTop: "10px" }}>Status: {debugStatus}</p>
         <div className="spinner"></div>
@@ -312,7 +318,7 @@ function App() {
   if (error && !vitals) {
     return (
       <div className="loading-screen">
-        <h2>❌ Connection Error</h2>
+        <h2>❌ Connection Error (v2.1)</h2>
         <p>{error}</p>
         <p>Please ensure the backend server is running.</p>
         <button
@@ -328,7 +334,21 @@ function App() {
             fontSize: "1rem",
           }}
         >
-          Retry Connection
+        </button>
+        <button
+          onClick={handleLogout}
+          style={{
+            marginTop: "0.5rem",
+            padding: "0.5rem 1rem",
+            background: "#e53e3e",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          Force Logout / Clear Session
         </button>
       </div>
     );

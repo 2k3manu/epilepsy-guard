@@ -16,11 +16,17 @@ source venv/bin/activate
 nohup python3 data_generator.py > data_gen_localized.log 2>&1 &
 echo "Data Generator started."
 
-echo "Starting authenticated Backend (with npm install)..."
+echo "Starting localized Backend..."
 cd backend
-npm install --silent
 nohup node flask_app.js > backend_auth.log 2>&1 &
 echo "Backend started."
 
+echo "Starting localized Frontend (React)..."
+cd ../frontend
+export NODE_OPTIONS=--openssl-legacy-provider
+nohup npm start > frontend_final.log 2>&1 &
+echo "Frontend started."
+
 sleep 2
-ps aux | grep -E "flask_app|data_generator"
+ps aux | grep -E "flask_app|data_generator|react-scripts"
+echo "All services initiated. Check logs for details."
