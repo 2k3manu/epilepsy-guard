@@ -57,12 +57,3 @@ Presentation/
 # Large media files
 *.mp4
 
-# Reports - exclude reference/duplicate files (keep our own)
-reports/Report_PES1PG23CA*.pdf
-reports/Report_PES1PG24CA269 (1).pdf
-reports/Report_Assessment*.pdf
-reports/Capstone Project Phase-2*.docx
-reports/Phase 1.pdf
-reports/EpilepsyGaurd Phase 1.pdf
-reports/Report Phase 2.pdf
-reports/literature Survey.pdf

@@ -204,12 +204,7 @@ EpilepsyGuard/
 │   │   └── utils/
 │   │       └── ReportGenerator.js  # jsPDF clinical report generator
 │   └── package.json
-├── reports/
-│   ├── Report_Plag.tex       # LaTeX source for Phase-2 report
-│   ├── report.tex            # LaTeX source (alternate version)
-│   ├── Final Report.pdf      # Compiled final submission PDF
-│   ├── Screenshots/          # Dashboard & system screenshots
-│   └── Diagrams/             # Architecture & flow diagrams
+
 ├── data_generator.py         # Kafka producer (3 patients, 3sec intervals)
 ├── direct_cassandra_generator.py  # Direct Cassandra data insertion
 ├── kafka_to_cassandra.py     # Standalone Kafka → Cassandra consumer
@@ -232,15 +227,7 @@ EpilepsyGuard/
 
 ---
 
-## 📑 Reports & Documentation
 
-- **Phase-1 Report** — `reports/Phase 1.pdf`
-- **Phase-2 Final Report** — `reports/Final Report.pdf`
-- **LaTeX Source** — `reports/Report_Plag.tex` (primary), `reports/report.tex` (alternate)
-- **Architecture Diagram** — `architecture Diagram.png`
-- **Plagiarism Report** — `reports/Plagiarism.png`
-
----
 
 ## 📜 License
 
