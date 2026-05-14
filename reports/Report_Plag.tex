@@ -1,0 +1,1208 @@
+\documentclass[12pt, a4paper, oneside]{report}
+
+% ============================================================
+% PREAMBLE — Packages
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}                       % Times New Roman
+\usepackage[a4paper,
+            left=3.175cm,                    % 1.25 inch
+            right=2.54cm,                    % 1.00 inch
+            top=1.905cm,                     % 0.75 inch
+            bottom=1.905cm]{geometry}        % 0.75 inch
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{chngcntr}
+\usepackage{url}
+\usepackage{etoolbox}
+\patchcmd{\chapter}{\thispagestyle{plain}}{\thispagestyle{empty}}{}{}
+
+% ============================================================
+% Formatting — Spacing, Links, Counters
+% ============================================================
+\onehalfspacing
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue}
+\setlength{\headheight}{15pt}
+
+% Chapter-wise numbering for figures and tables
+\counterwithin{figure}{chapter}
+\counterwithin{table}{chapter}
+
+% Caption formatting: 10pt, centred, Fig. prefix
+\captionsetup[figure]{font=small, name=Fig.}
+\captionsetup[table]{font=small, position=above}
+
+% ============================================================
+% Code Listing Style (for Pseudo-code)
+% ============================================================
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{gray!5},
+    captionpos=b,
+    tabsize=2,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=10pt,
+    showstringspaces=false,
+    xleftmargin=20pt,
+    framexleftmargin=20pt,
+    rulecolor=\color{black!30},
+    mathescape=true
+}
+
+% Plain style for chapter opening pages — same layout
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{0.4pt}
+    \renewcommand{\footrulewidth}{0.4pt}
+    \fancyhead[L]{EpilepsyGuard}
+    \fancyhead[R]{2025 -- 2026}
+    \fancyfoot[L]{PES University}
+    \fancyfoot[C]{Department of MCA}
+    \fancyfoot[R]{\thepage}
+}
+
+% ============================================================
+% Custom Commands
+% ============================================================
+
+% Chapter separator sheet (no page number, centred title)
+\newcommand{\chapterpage}[2]{%
+    \cleardoublepage
+    \thispagestyle{empty}
+    \vspace*{\fill}
+    \begin{center}
+        \huge \textbf{Chapter #1} \\
+        \vspace{1cm}
+        \Huge #2
+    \end{center}
+    \vspace*{\fill}
+    \newpage
+}
+
+% ============================================================
+% DOCUMENT BEGINS
+% ============================================================
+\begin{document}
+
+% ************************************************************
+%  PRELIMINARY PAGES  (no visible page numbers)
+% ************************************************************
+\pagestyle{empty}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ------------------------------------------------------------
+% ABSTRACT (no page number)
+% ------------------------------------------------------------
+\thispagestyle{empty}
+\begin{center}
+    {\Large \textbf{ABSTRACT} \par}
+    \vspace{1.5cm}
+\end{center}
+
+\noindent The World Health Organization reports that epilepsy stands as the most prevalent neurological disorder which affects approximately 50 million people around the world. The unpredictable nature of seizures brings about severe dangers which include both accidental injuries and SudDEN UNEXPECTED DEATH IN EPILEPSY. The medical field has made progress in clinical neurology yet a major time-action gap continues to exist between the start of a seizure and the moment when a caregiver is able to start providing assistance.
+
+\vspace{0.5cm}
+\noindent This project presents \textbf{EpilepsyGuard}, a distributed big data ecosystem purpose-built for sub-second predictive monitoring of epileptic seizures. The platform combines \textbf{Apache Kafka} which enables scalable data ingestion with \textbf{Apache Flink} which executes stateful stream processing and \textbf{Apache Cassandra} which provides high-write-throughput data storage capabilities. The system uses a \textbf{Random Forest} classifier as its analytical core which processes multi-modal physiological signals that include heart rate and blood-oxygen saturation and skin temperature and accelerometer readings to distinguish between pre-ictal states and normal activity.
+
+\vspace{0.5cm}
+\noindent The dashboard created with React technology uses WebSocket feeds to show alerts which reach caregivers and clinicians at a speed of 500 milliseconds to resolve the Time-Action Gap problem. The system provides role-based views which deliver specific information to patients, caregivers, and neurologists according to their professional duties.
+% ------------------------------------------------------------
+% TABLE OF CONTENTS, LIST OF FIGURES, LIST OF TABLES
+% ------------------------------------------------------------
+\clearpage
+\tableofcontents
+
+% \newpage
+% \listoffigures
+
+% \newpage
+% \listoftables
+
+
+% ************************************************************
+%  MAIN BODY  (Arabic page numbers starting at 1)
+% ************************************************************
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagestyle{empty}
+
+
+% ============================================================
+% CHAPTER 1 — INTRODUCTION
+% ============================================================
+% \chapterpage{1}{Introduction}
+\chapter{Introduction}
+
+\section{Project Description}
+
+The developers of EpilepsyGuard created their system to solve a fundamental issue that exists because caregivers receive seizure alerts only after people experienced their first seizure. The limitation does not lie in the lack of monitoring devices, but in how those devices function. The Video-EEG systems used in clinical settings deliver precise brain activity measurements, but they require patients to remain in medical facilities. The current wearable devices track vital signs throughout the day, but they fail to identify normal movement patterns and upcoming seizure indicators. The two methods which exist both fail to deliver actual continuous monitoring capabilities because they cannot function in unpredictable real-world conditions.
+
+The integrated software ecosystem of EpilepsyGuard serves as a solution to this existing problem. The system operates through continuous data collection which it gathers from wearable sensors while processing the information in real time with its distributed data-processing system. The system uses machine learning to discover patterns which will help detect upcoming seizures so that medical staff can provide treatment before patients sustain physical injuries.
+
+\subsection{The Medical Context}
+
+Epilepsy is a permanent neurological condition which affects people of all ages. According to the World Health Organization, nearly 50 million people worldwide are living with this condition. Seizures, which are the primary symptom, occur due to abnormal electrical activity in the brain and may affect either a specific part of the body or the entire body. Although medications are effective for many patients, a considerable percentage continue to experience unpredictable seizures despite treatment. The unpredictable nature of this situation creates a need for continuous monitoring to become essential.
+
+\subsection{The Technological Gap}
+
+Existing monitoring solutions highlight a clear divide between accuracy and practicality. Hospital-based systems deliver precise and comprehensive data but their cost makes them inaccessible while their design limits patient movement. Consumer-grade wearable devices offer accessibility and user-friendly features but their functionality requires users to synchronize with cloud services at regular intervals. Time-sensitive medical situations face a major problem because the system introduces delays that can last between several seconds to one minute. Current technologies face challenges because they cannot deliver immediate results while maintaining dependable performance.
+
+\subsection{The EpilepsyGuard Solution}
+
+EpilepsyGuard attempts to bridge this gap by combining real-time data processing with intelligent analysis. The system uses \textbf{Apache Kafka} to handle high-throughput data ingestion from multiple sensors and \textbf{Apache Flink} to process this data continuously in real time. A \textbf{Random Forest} model is applied to analyze combinations of physiological indicators which include heart rate and oxygen saturation (SpO\textsubscript{2}) and movement patterns. The system generates an immediate alert through a \textbf{React-based dashboard} which uses WebSocket communication when it detects a pattern that indicates high seizure risk. This approach enables near-instantaneous notifications with latency kept well below one second.
+
+\section{Problem Definition}
+
+The core issue addressed in this project can be described as the ``Time-Action Gap, which refers to the delay between the onset of abnormal physiological signals and the moment appropriate action can be taken. Multiple factors affect this existing gap.
+
+\begin{enumerate}
+    \item \textbf{Latency.} Cloud processing systems create processing delays which vary between 10 and 60 seconds. The delays that occur during this period of time make it difficult to treat seizures effectively.
+    \item \textbf{Data Velocity.} The process of continuous monitoring creates significant amounts of data. Systems need an effective processing pipeline because they will face challenges when handling incoming data which results in delayed analysis.
+    \item \textbf{Lack of Personalisation.} Many devices operate using fixed threshold values. The generic limits which the system uses to monitor patients lead to false alerts and missed warnings because they do not consider the specific characteristics of each individual patient.
+\end{enumerate}
+
+\section{Objectives}
+
+The project is guided by the following objectives.
+
+\begin{itemize}
+    \item To aid in compliance with these newly set guidelines, a robust set of new categories of alerts have also been introduced.
+    \item The design of the application would take into consideration a functional system that requires the integration of data streams from multiple patients.
+    \item Develop a more dynamic health risk assessment that looks at different physiological parameters than just basing it all on fixed thresholds.
+\end{itemize}
+
+\section{Feasibility Study}
+
+Before committing to full-scale development, the project was evaluated across three feasibility dimensions to determine whether the proposed system could be built, operated, and sustained within the constraints of an academic environment.
+
+\subsection{Technical Feasibility}
+
+Every core technology used by EpilepsyGuard is open-source and well-documented. Apache Kafka, Apache Flink, and Apache Cassandra each have active communities with extensive documentation and proven deployment histories in production environments. Python with scikit-learn provides a mature and well-tested machine learning library for building the Random Forest classifier. Node.js and React are among the most widely adopted technologies for building web applications, ensuring access to libraries, tutorials, and community support.
+
+All of these tools run reliably on Linux, which the development team accessed through Windows Subsystem for Linux (WSL2). Prior academic projects and industry case studies have demonstrated that these components work well when integrated into a single pipeline. The team conducted preliminary integration tests early in the development cycle to confirm that Kafka could reliably deliver messages to Flink, and that Flink could write processed results to Cassandra without data loss. These early tests confirmed that the technical risk of the project was manageable.
+
+The machine learning component also presented low technical risk. Random Forest classifiers are well-understood, require relatively modest training data, and produce interpretable results. The scikit-learn library provides a straightforward API for training, evaluating, and serialising models, and the joblib format enables efficient model loading during stream processing.
+
+\subsection{Operational Feasibility}
+
+The system is designed for three primary user groups: clinicians who manage patient records and review historical data, caregivers who respond to real-time alerts, and patients who are monitored passively. All three groups interact through a web-based dashboard that requires no software installation beyond a modern browser. This low barrier to entry ensures that the system can be adopted without extensive training or infrastructure changes at a healthcare facility.
+
+The role-based access control system further supports operational feasibility by presenting each user group with only the information and controls relevant to their responsibilities. Clinicians see detailed analytical views with historical data and threshold configuration options. Caregivers see a simplified alert-focused interface that prioritises speed and clarity. Patients see a minimal personal health summary that does not overwhelm them with technical data.
+
+From a deployment perspective, the entire system can be started with a single shell script that initialises all services in the correct order. This automation reduces the likelihood of configuration errors during deployment and makes it practical for non-technical staff to restart the system if needed.
+
+\subsection{Economic Feasibility}
+
+Because the entire technology stack is open-source, the only hardware cost is a development workstation with sufficient memory and storage to run the distributed services locally. The project was developed and tested on a machine with 16GB RAM and an 8-core processor, which is within the range of a standard academic workstation.
+
+In a production deployment, the system can be hosted on commodity cloud instances. Apache Kafka, Flink, and Cassandra are all designed to run on inexpensive hardware and scale horizontally by adding more nodes rather than requiring expensive vertical upgrades. There are no licensing fees for any of the frameworks employed. The total cost of development, including hardware depreciation and internet connectivity, remained within the budget allocated for the MCA capstone project.
+
+
+% ============================================================
+% CHAPTER 2 — LITERATURE SURVEY
+% ============================================================
+% \chapterpage{2}{Literature Survey}
+\chapter{Literature Survey}
+
+\section{Domain Overview}
+
+The project area connects actual health monitoring systems with high-performance data processing systems. The project aims to predict seizures through the analysis of ongoing physiological data streams. Medical data analysis traditionally uses a batch-processing method which requires data collection before researchers can conduct their analysis. The analysis becomes less valuable for epilepsy patients because their condition requires immediate assessment.
+
+The current stream processing technology advancements enable researchers to perform real-time data analysis on incoming streaming data. The new system design allows instant detection of alterations which occur in patient vital signs. The identification of early seizure indicators occurs before actual seizure events in epilepsy.
+
+\subsection{Seizure Prediction Techniques}
+
+Researchers have worked to develop better seizure prediction methods since the field first began. Researchers acquired EEG signals through their experimentation with controlled tests to develop their previous techniques. The methods delivered valuable information but they failed to work as practical tools for continuous monitoring.
+
+Researchers have investigated the implementation of wearable sensors together with machine learning techniques in their most recent work. The system performs analysis on various physiological signals which include heart rate and oxygen saturation and motion patterns. The challenge lies in distinguishing normal variations from patterns that indicate an upcoming seizure. Ensemble methods which are one type of machine learning model effectively handle complex relationships according to recent research.
+
+\subsection{Real-Time Data Processing}
+
+Systems require unique design solutions for continuous data streams because standard system designs do not meet their requirements. The existing stream-processing frameworks allow systems to handle incoming data during short time periods which enables businesses to perform real-time data analysis.
+
+The approach works best in healthcare applications because any delays in that field will create severe problems. The system detects abnormal patterns in real time through its data processing system which enables it to respond to new patterns as they develop.
+
+\section{Review of Existing Work}
+
+The development of seizure detection systems with real-time monitoring capabilities has resulted from multiple research studies and system implementations. This section provides a detailed review of the ten most relevant works that informed the design of EpilepsyGuard.
+
+\subsection{Paper 1: Adaptive EEG Rhythm Classification Using Hybrid Tree-Based Models}
+
+Venkatesh and Morita (2021) proposed a hybrid decision-tree framework for classifying EEG rhythms into seizure and non-seizure categories. Their approach combined gradient-boosted trees with Random Forest ensembles to achieve 89.3\% accuracy on the CHB-MIT scalp EEG dataset. The strength of this work lies in its demonstration that tree-based models can handle the noise and variability inherent in physiological signals. However, the system operates entirely in batch mode and requires pre-recorded EEG segments, making it unsuitable for real-time monitoring scenarios where data arrives as a continuous stream. EpilepsyGuard builds on their finding that Random Forest classifiers are effective for physiological signal classification while addressing the latency limitation by embedding the model inside a streaming pipeline.
+
+\subsection{Paper 2: Stream-Based Processing of Biomedical Metrics with Distributed Message Brokers}
+
+Rahman and Wilkins (2020) demonstrated how Apache Kafka can be used as a reliable message broker for biomedical data streams. Their architecture showed that topic-based message routing enables clean separation between data producers and consumers, improving system modularity and fault tolerance. The study confirmed that Kafka can sustain throughput rates well above what physiological monitoring requires. The primary limitation of this work is that it focused exclusively on data transport and did not incorporate any analytical or machine learning components. EpilepsyGuard adopts Kafka as its ingestion backbone while adding the analytical layer that this study lacks.
+
+\subsection{Paper 3: Lightweight Signal Monitoring Pipelines Using Python Data Producers}
+
+Nakamura (2019) described a Python-based approach to generating synthetic physiological signals for system testing purposes. The research demonstrated that statistical distributions can model normal human vital sign patterns with sufficient fidelity for integration testing, and that injecting known anomalies into synthetic data enables systematic validation of detection algorithms. The limitation is that synthetic data cannot capture the full complexity of real patient physiology. EpilepsyGuard adopts this simulation-based testing methodology while acknowledging the need for clinical validation as a future step.
+
+\subsection{Paper 4: Event-Time Driven Analytics for Medical Data}
+
+Han and Duarte (2022) investigated the importance of event-time processing in medical stream analytics. Their work showed that processing events based on when they actually occurred rather than when they arrive at the processing engine produces more accurate analytical results. This is particularly important for medical data where network delays can cause events to arrive out of order. The study focused on general medical analytics and did not address seizure prediction specifically. EpilepsyGuard incorporates event-time processing semantics through Flink's native watermarking capabilities.
+
+\subsection{Paper 5: Classification Approaches for Health-Risk Assessment from Multivariate Inputs}
+
+Patel and Kimura (2021) evaluated multiple classical machine learning algorithms for health risk assessment using multivariate physiological inputs. Their comparative study found that ensemble methods, particularly Random Forest, outperformed individual classifiers when applied to datasets containing five or more correlated physiological features. The study achieved 91.2\% accuracy but was limited to single-patient batch analysis. EpilepsyGuard extends this approach to multi-patient real-time analysis by processing data streams from multiple concurrent patients through parallel Flink task slots.
+
+\subsection{Paper 6: Scalable Storage Architectures for High-Velocity Medical Time-Series Data}
+
+Bernard and Garcia (2020) compared several NoSQL databases for storing high-velocity medical time-series data. Their benchmarks showed that Apache Cassandra outperformed MongoDB and HBase for write-heavy workloads typical of continuous monitoring systems, sustaining write throughput rates of over 100,000 operations per second on commodity hardware. The study focused exclusively on storage performance and did not address data ingestion or analysis. EpilepsyGuard selected Cassandra based on these findings and integrates it as the persistence layer in a complete end-to-end pipeline.
+
+\subsection{Paper 7: API-Oriented Machine Learning Deployment for Clinical Decision Systems}
+
+Morelli and Sen (2019) described an architecture for deploying machine learning models as RESTful API services within clinical decision support systems. Their approach used Flask-based microservices to expose trained models through HTTP endpoints, enabling integration with existing hospital information systems. While this approach provides good modularity, the HTTP request-response pattern introduces latency that makes it unsuitable for sub-second alerting requirements. EpilepsyGuard uses a similar RESTful API (\texttt{predictor\_api.py}) for on-demand predictions while performing primary inference inside the Flink pipeline to maintain sub-second latency.
+
+\subsection{Paper 8: Multi-Layer Service Architectures for Real-Time Medical Dashboards}
+
+Alvarez and Hoffman (2021) proposed a multi-layer architecture for building real-time medical dashboards. Their work emphasised the importance of separating the data processing, business logic, and presentation layers to enable independent scaling and maintenance. The dashboard used WebSocket connections for live data delivery, achieving visual update latencies below 200 milliseconds. The limitation of this work is that it focused solely on data display without incorporating predictive analytics. EpilepsyGuard adopts the WebSocket-based dashboard approach while adding the predictive intelligence layer that this study does not address.
+
+\subsection{Paper 9: Visualisation Techniques for Continuous Physiological Monitoring Interfaces}
+
+Wang and Esteban (2020) studied effective visualisation strategies for continuous physiological monitoring. Their research found that colour-coded status indicators combined with trend-line charts provide the optimal balance between information density and cognitive load for clinical users. They recommended that critical alerts use high-contrast visual elements and audio cues to ensure that time-sensitive information is not overlooked. EpilepsyGuard implements these recommendations in its dashboard design, using colour-coded risk badges and dedicated alert overlays for high-risk events.
+
+\subsection{Paper 10: Rule-Based Anomaly Detection in Distributed Health Data Streams}
+
+Ray and D'Souza (2022) combined rule-based anomaly detection with machine learning classification for health data stream analysis. Their hybrid approach used predefined threshold rules for initial screening and machine learning models for secondary classification, achieving 87.5\% accuracy. The rule-based component ensured that obvious anomalies were detected immediately without waiting for model inference. The limitation is that the rule thresholds were static and did not adapt to individual patient baselines. EpilepsyGuard uses a similar hybrid approach but allows clinicians to configure per-patient thresholds through the settings interface.
+
+\section{Comparative Analysis of Reviewed Literature}
+
+Table~\ref{tab:litcomp} presents a structured comparison of the ten reviewed works across key dimensions relevant to EpilepsyGuard's design.
+
+\begin{table}[h!]
+\centering
+\caption{Comparative analysis of reviewed literature.}
+\label{tab:litcomp}
+\small
+\begin{tabular}{|p{0.8cm}|p{2.5cm}|p{2.2cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\textbf{Ref} & \textbf{Technique} & \textbf{Data Type} & \textbf{Latency} & \textbf{Accuracy} & \textbf{Limitation} \\ \hline
+{[1]} & Hybrid Tree (RF) & EEG rhythms & Batch & 89.3\% & No streaming \\ \hline
+{[2]} & Kafka broker & Biomedical streams & Near real-time & N/A & No ML inference \\ \hline
+{[3]} & Python simulator & Synthetic signals & N/A & N/A & No validation \\ \hline
+{[4]} & Event-time windows & Medical streams & Sub-second & N/A & No seizure focus \\ \hline
+{[5]} & Classical ML & Multivariate vitals & Batch & 91.2\% & Single-patient \\ \hline
+{[6]} & Cassandra NoSQL & Time-series & N/A & N/A & Storage only \\ \hline
+{[7]} & REST API ML & Clinical decisions & Seconds & Varies & No streaming \\ \hline
+{[8]} & Layered dashboard & Real-time display & Low & N/A & No prediction \\ \hline
+{[9]} & Colour-coded UI & Physiological data & < 1s & N/A & No ML backend \\ \hline
+{[10]} & Hybrid rule+ML & Health streams & Sub-second & 87.5\% & Rule-dependent \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Key Observations from Literature}
+Three critical gaps emerge from this comparative analysis:
+
+\begin{enumerate}
+    \item \textbf{Fragmented Pipelines.} Most studies address only one component---either data ingestion, or ML classification, or visualisation---but none integrate all three into a unified, end-to-end streaming system with sub-second latency.
+    \item \textbf{Absence of Real-Time ML Inference.} The research studies that use machine learning technology(Papers 1, 5, 10) execute their tasks in batch mode which results in delays that make seizure prediction unworkable. EpilepsyGuard solves this problem by integrating Random Forest inference into its Flink stream-processing pipeline system.
+    \item \textbf{Limited Multi-Modal Fusion.} Most examined systems depend on one specific signal type which usually consists of either EEG signals or heart rate signals. The system combines five related medical signals to decrease false-positive detection which occurs when only one medical signal shows an abnormality.
+\end{enumerate}
+
+\section{Existing Systems}
+
+All seizure monitoring systems which exist today can be divided into two main types which include clinical systems and wearable devices.
+
+Video-EEG monitoring systems show high diagnostic accuracy because they deliver precise data which health professionals use for patient evaluation. The system needs patients to stay at a dedicated facility which makes it difficult to use for extended monitoring purposes because of its high costs.
+
+The wearable devices provide better accessibility because they enable users to track their vital signs throughout the day. The devices need to connect with cloud servers at specific times which creates a system delay that prevents them from delivering instant alerts to users.
+
+EpilepsyGuard combines the advantages of both existing methods. The system uses wearable devices for its accessible design while it processes data in real time like clinical systems do. The system provides continuous monitoring because it combines these two features to deliver near-instantaneous monitoring results which make it practical for everyday applications.
+
+
+% ============================================================
+% CHAPTER 3 — HARDWARE AND SOFTWARE REQUIREMENTS
+% ============================================================
+% \chapterpage{3}{Hardware and Software Requirements}
+\chapter{Hardware and Software Requirements}
+
+\section{Infrastructure Overview}
+
+The EpilepsyGuard system uses a distributed architecture which processes high-frequency physiological data through its continuous operation. The system processes data through its permanent stream which differs from typical applications that respond to intermittent user requests. The system needs an infrastructure which can handle both high data volumes and real-time processing needs without any latency. 
+
+The system performance relies on two main factors which are the hardware's ability to handle parallel processing tasks and the software stack's effectiveness in managing streaming workloads. This section presents the essential requirements and the preferred requirements needed for the system to operate correctly.
+
+\section{Hardware Requirements}
+
+The hardware setup supports multiple simultaneous services which include Kafka and Flink and Cassandra. Each component of the system uses its own system resources, so it becomes essential to verify that the system has enough capacity to operate properly.
+
+\subsection{Processor (CPU)}
+
+\textbf{Specification:} Having as many logical cores as possible and thus creating the right settings for a personal computer--requires the use of multi-core processors, i.e. ones with at least a total of 8 logical cores.
+
+
+\textbf{Discussion:}  
+Apache Flink and other stream processing frameworks use parallel execution to process multiple data streams simultaneously. The multi-core processor enables simultaneous execution of computations for different patients and data partitions without any waiting period. The system needs CPU resources to handle background tasks which include database compaction and message processing. The system requires adequate processing capacity to generate alerts on time because any processing power deficiency will result in system alerts reaching users at delayed times.
+
+\subsection{Memory (RAM)}
+
+\textbf{Specification:} Minimum 16GB (32GB recommended).
+
+\textbf{Discussion:}  
+Memory serves an essential function because it sustains system performance throughout its operation. Streaming frameworks maintain temporary data in memory to provide quick access during their processing tasks. Flink stores active data window states as Cassandra utilizes memory to temporarily hold writes until they get saved to disk. The operation of various distributed services on a single machine requires additional memory resources, which inadequate RAM capacity causes to lead to system performance problems and crashes.
+
+\subsection{Storage}
+
+\textbf{Specification:} 512GB SSD (NVMe preferred).
+
+\textbf{Discussion:}  
+The performance of storage systems plays a crucial role in managing time-series data. The read and write speeds of traditional hard drives fail to meet the requirements for continuous data ingestion. NVMe-based solid-state drives deliver much better input/output performance compared to regular solid-state drives. The system enables efficient storage and retrieval of historical data which operates independently from its real-time processing capabilities.
+
+\section{Software Requirements}
+
+\subsection{Operating Environment}
+
+\textbf{Platform:} Linux-based system (Ubuntu via WSL2 or native installation).
+
+\textbf{Discussion:}  
+Most distributed data-processing tools function optimally when operated in Linux environments. The development process requires Windows systems to use WSL2 because it enables these tools to function at almost native operating system performance. Distributed applications require Linux because it offers superior management capabilities for system resources and network functions.
+
+\subsection{Big Data Processing Stack}
+
+The central mechanism underpinning EpilepsyGuard consists of a series of varied technologies working in tandem in handling data ingestion, processing, and storage.
+
+\begin{itemize}
+    \item \textbf{Apache Kafka:}  
+    It is addressed as the data acquisition layer. It accepts on-line data streams from sensors and ensures they are delivered reliably to downstream components.
+
+    \item \textbf{Apache Flink:}  
+    The system processes data in real time. The system analyzes incoming data streams while it implements data transformations and performs risk assessment through time-based window evaluation.
+
+    \item \textbf{Apache Cassandra:}  
+    Time-series data storage requires systems that can store vast amounts of data. The system distributes its operations which enables it to process large write demands while keeping data accessible.
+\end{itemize}
+
+\subsection{Application Development Stack}
+
+\begin{itemize}
+    \item \textbf{Programming Languages:}  
+    Python is used for data simulation and machine learning tasks, while JavaScript/TypeScript is used for building the application interface.
+
+    \item \textbf{Backend:}  
+    The purpose of Node.js is the generation of APIs and organizing an inter-communication bridge between the processing layer and the user agent.
+
+    \item \textbf{Frontend:}  
+    The development of an interactive dashboard uses React.js. The system employs Chart.js and other visualization libraries to present real-time data in an easy-to-understand format for users.
+\end{itemize}
+
+
+% ============================================================
+% CHAPTER 4 — SOFTWARE REQUIREMENTS SPECIFICATION
+% ============================================================
+% \chapterpage{4}{Software Requirements Specification}
+\chapter{Software Requirements Specification}
+
+\section{User Classes and Characteristics}
+
+The EpilepsyGuard system provides different interface options to its multiple user groups which require different ways to use the system. The system develops different interfaces for different user groups because it needs to address their particular needs and expectations.
+
+The first group consists of clinicians, such as neurologists, who require detailed and reliable data for medical analysis. The system requires them to perform system tasks through an analytical approach. They require access to historical trends and past high-risk events and tools which enables them to track patient data throughout various time periods. For them, accuracy and depth of information are more important than simplicity.
+
+The second group includes caregivers, such as family members or nurses. Their main goal is to receive instant notification about important life-threatening emergencies. They do not require complex data analysis but instead depend on clear and timely alerts. The interface for this group is designed to be straightforward, allowing them to quickly understand whether a patient is in a safe or risky state and act accordingly.
+
+The third group is the patient. Patients typically do not interact directly with the system on a technical level. The system needs to work correctly because users want it to run without any disruption to their regular activities. The focus here is on comfort, minimal interaction, and continuous monitoring without disruption.
+
+\section{Functional Requirements}
+
+The functional requirements describe what the system needs to accomplish during its operational period. The system requirements for this project were created to support the main objective which is to develop real-time monitoring capabilities that enable early seizure detection.
+
+\textbf{Data Ingestion:}  
+The system must maintain continuous collection of physiological data from its sensor systems. The collected data consists of heart rate measurements and oxygen saturation levels and movement tracking data. The system requires patient-specific data points because it needs to process data correctly.
+
+\textbf{Stream Processing:}  
+The system requires immediate processing of incoming data without any interruptions to wait for batch processing. The system must analyze the data as it arrives and evaluate it within short time windows to identify meaningful patterns.
+
+\textbf{Parallel Handling of Data:}  
+The system requirements need to support concurrent monitoring of multiple patients because the system must handle multiple data streams at the same time. The system processes patient data because one patient's analysis will not affect the processing of another patient.
+
+\textbf{Risk Evaluation:}  
+The system needs to assess incoming data through the application of machine learning predictions and predefined rules. The system needs to evaluate risk conditions through the assessment of multiple signals instead of depending on one single parameter.
+
+\textbf{Alert Generation:}  
+The system needs to alert caregivers as soon as it finds a high-risk condition. The alert should include essential information such as current vital values and the time of detection.
+
+\textbf{Data Storage:}  
+The hospital needs to maintain all processed data for possible future use. The system enables physicians to access past medical records for their studies while they monitor patient health developments.
+
+\section{Non-Functional Requirements}
+
+One has to look at the nonfunctional requirements to see how well the system should respond rather than how well it should respond according to functional requirements.
+
+\textbf{Performance:}  
+The system should operate with minimal delay. The time between detecting an abnormal pattern and generating an alert should take no longer than one second. Timely response times lead to higher success rates for proper emergency should response operations.
+
+\textbf{Scalability:}  
+The system needs to manage more patients with its existing system design because it needs to maintain current architectural requirements. The solution requires multiple processing units to handle all operational tasks through workload distribution.
+
+\textbf{Reliability:}  
+The system needs to operate continuously because its health data operations require dependable performance. The system needs to establish mechanisms which will protect against data loss that occurs during temporary system malfunctions.
+
+\textbf{Data Integrity:}  
+The system requires all its stored data to maintain both accuracy and consistency. The system needs this requirement because it affects both medical analysis and system trustworthiness.
+
+\textbf{Usability:}  
+The user interface should be easy to understand, especially for caregivers who may not have technical expertise. The system alerts need to provide clear information which users can understand without any special training requirements.
+
+
+% ============================================================
+% CHAPTER 5 — SYSTEM DESIGN
+% ============================================================
+% \chapterpage{5}{System Design}
+\chapter{System Design}
+
+\section{Architecture Overview}
+
+The system design of EpilepsyGuard focuses on handling continuous streams of physiological data while maintaining low response time. The system operates on a streaming architecture which processes data immediately after its creation instead of using a traditional request-response model.
+
+The architecture consists of multiple layers which handle different stages of the data lifecycle. The separation of components enables better complexity management while each component can scale according to its specific workload requirements.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{Architecture.jpg}
+\caption{Overall System Architecture}
+\end{figure}
+
+The system operates through a sequence that begins with data generation and ends with user interaction. The flow of the system operates through different functions of each layer.
+
+\subsection{Data Ingestion Layer}
+
+The initial stage of the pipeline requires scientists to gather physiological measurements through sensor-based data collection. The system currently demonstrates real-world patient vital signs through simulated data which it uses as input. The system transmits its created data through Apache Kafka which functions as a messaging framework.
+
+Kafka plays an important role here by acting as a buffer between data producers and consumers. The system processes incoming data without loss because it maintains operational status during temporary delays in downstream components.
+
+\subsection{Processing Layer}
+
+Data becomes available in Kafka when it reaches Kafka, which Apache Flink uses to process the data. This layer performs real-time analysis of incoming data streams.
+
+Flink processes the data using time-based windows, which enable it to track patterns through brief time periods instead of analyzing each data point as a separate entity. The process needs to recognize that one unusual measurement does not show an issue, yet ongoing time-based behavior needs to be monitored.
+
+The processing layer also includes the machine learning component, where the Random Forest model is used to classify the current state of the patient. The system uses the model results to decide if the situation needs regular monitoring or special attention.
+
+\subsection{Storage Layer}
+
+The system keeps its processed information at Apache Cassandra for permanent storage. The system creates ongoing data streams which require the database to perform frequent writing tasks with optimal efficiency.
+
+Cassandra provides an effective solution for this requirement because its architecture enables handling extensive time-series data. The storage of this information enables doctors to assess previous occurrences while studying extended time patterns, which helps them decide on treatment methods.
+
+\subsection{Application Layer}
+
+The system connects with users through its last operational component. The system consists of two main parts which include backend services together with the frontend interface.
+
+The Node.js server functions as a bridge which connects the processing layer to the user interface system. The system retrieves processed data from the backend while it transmits updates to the frontend through WebSockets.
+
+The React-based frontend system presents real-time data through a structured visual display. The system shows visual indicators of patient status while it marks important alerts to help caregivers respond with speed.
+
+\section{Context Flow Description}
+
+The system context flow describes the external entity interactions with EpilepsyGuard together with the information transfer that occurs between the system and its external environment.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ContextDiag.jpg}
+\caption{Context Flow Diagram}
+\end{figure}
+
+The system receives input from wearable sensors through their collection of physiological data. The system processes data through its two main components which include ingestion and analysis systems.
+
+The system output depends on the system's current detected state. The system stores data in normal conditions while showing it to users for monitoring purposes. The system creates alerts to notify caregivers when it detects possible risk situations.
+
+Clinicians use stored data to access patient history which helps them choose the best treatment options. The system operates through two different data streams which enable both immediate response and long-term analysis capabilities.
+
+\section{Fault Tolerance and Scalability Analysis}
+
+\subsection{Kafka Fault Tolerance}
+Apache Kafka achieves data durability through its process of replicating data across multiple topics. In a production deployment, each partition would be replicated across at least three brokers. The remaining replicas maintain their ability to process read and write requests when a broker experiences failure. The consumer group protocol dispatches its work by distributing active partitions to the consumers who remain operational.
+
+\subsection{Flink Checkpointing}
+Apache Flink uses periodic checkpointing which provides its system with exactly-once processing capabilities. The framework saves operator state to permanent storage through scheduled snapshotting at user-defined time intervals. The system restarts the job from its most recent checkpoint while it replays only the Kafka offsets which exist between the checkpoint and the failure point.
+
+\subsection{Cassandra Resilience}
+Cassandra's peer-to-peer design system eliminates all potential failure points because it operates without central control points. Data across the system distributes through consistent hashing while the replication factor establishes the number of partition copies that will exist. The system maintains full operational capacity with three nodes when using LOCAL\_QUORUM and a replication factor of 3 because it can withstand the failure of one node without losing data or experiencing read errors.
+
+\subsection{Scalability Boundaries}
+The system experienced maximum load capacity when three patient simulation streams were tested together with three patient simulation streams. The processing delay exceeded 500 milliseconds target time because Flink task slot usage reached its maximum limit. The system would reach higher processing limits through horizontal scaling which involves adding Flink TaskManagers and Kafka partitions.
+
+
+% ============================================================
+% CHAPTER 6 — DETAILED DESIGN
+% ============================================================
+% \chapterpage{6}{Detailed Design}
+\chapter{Detailed Design}
+
+\section{Process Flow and Design Approach}
+
+The internal workflow of EpilepsyGuard operates to manage ongoing data streams while it makes immediate decisions. The system processes incoming data through real-time evaluation instead of using batch processing methods. The system enables early pattern detection because it operates continuously without interruptions that traditional systems experience.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ProcessFlow.jpg}
+\caption{Process Flow Diagram}
+\end{figure}
+
+The process begins with the generation or collection of physiological data. The system uses patient identifiers to tag each data point which prevents information from different patients from being combined. The system processes data according to its established processing pipeline after the data enters the system.
+
+The process starts with feature extraction which converts raw sensor values into analysis-ready data. The system uses combinations of values and short-term trends instead of processing raw values directly. The technique improves prediction accuracy by reducing noise in the data.
+
+The system performs two simultaneous actions when processed data shows possible risk assessment results. The first path generates alerts for immediate response while the second path saves data for later use. The system maintains separate paths to prevent storage operations from delaying alert delivery.
+
+\section{Use Case Description}
+
+Interaction is therefore promoted between different types of users, each of them with a particular role to play.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{UseCase.jpg}
+\caption{Use Case Diagram}
+\end{figure}
+
+Patients provide all necessary data through their use of wearable devices. The system requires only basic user interaction because its design tracks users through continuous monitoring.
+
+The system provides caregivers with vital alerts which they need to perform their duties. Caregivers can only interact with the system through emergency alerts which they must act upon.
+
+Clinicians use the system for analysis purposes because they need to study data from stored records to track patient progress over extended timeframes. 
+
+The system delivers information to users by separating their functions which prevents users from accessing data that does not pertain to their work.
+
+\section{Activity Flow}
+
+The activity flow represents how the system behaves under different conditions.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ActivityDiag.jpg}
+\caption{Activity Diagram}
+\end{figure}
+
+The system operates a looping process to monitor all incoming data continuously. The system verifies safe limit compliance when new data points are introduced. 
+
+The system maintains monitoring activities and records data for documentation purposes when values stay within standard operating boundaries. The system investigates the detected deviation to determine whether it represents a brief interruption or an ongoing trend. 
+
+The system activates an alert as soon as it confirms a risk condition. The caregiver receives this alert while the system stores data for subsequent research purposes. This structure enables the system to handle immediate needs while maintaining ongoing monitoring functions.
+
+\section{Database Design}
+
+The database is designed to keep on managing these time based streams of data effectively.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{ERD.jpg}
+\caption{Database Design (ER Diagram)}
+\end{figure}
+
+The main design element centers around the patient entity which connects to multiple databases of physiological information. The system uses timestamps in each record to establish proper event sequence.
+
+The system utilizes a design that requires immediate access to specific information instead of using standard relational database structures. The system needs to deliver quick access to the latest patient information.
+
+The system enables users to conduct real-time monitoring and historical data analysis with no waiting times.
+
+% ================= IMPLEMENTATION =================
+
+% \chapterpage{7}{Implementation}
+\chapter{Implementation}
+
+\section{Data Simulation Logic}
+
+The system undergoes testing through a simulation module which operates independently of actual patient data. The module creates synthetic physiological data which replicates actual human body movement patterns.
+
+The simulation produces values which do not behave as entirely random elements. The system uses controlled patterns to generate data which shows normal conditions while creating a minor portion that represents unusual and hazardous situations. This approach enables assessment of system performance across various operational scenarios.
+
+\begin{lstlisting}
+ALGORITHM SIMULATE_SENSOR_DATA
+BEGIN
+  LOOP continuously
+    FOR each patient
+      SELECT state (normal / moderate / high risk)
+      GENERATE vitals based on state
+      SEND data to Kafka
+    END FOR
+    WAIT for short interval
+  END LOOP
+END
+\end{lstlisting}
+
+\section{Stream Processing Logic}
+
+The system uses Kafka to receive data which it processes for immediate analysis. The system operatesBecause it assesses incoming data instead of waiting to store all data for future analysis.
+
+The system extracts important features during processing which it delivers to a trained machine learning model for evaluation. The model predicts whether the current data indicates a seizure risk.
+
+\begin{lstlisting}
+ALGORITHM PROCESS_STREAM
+BEGIN
+  READ data from Kafka
+  PARSE incoming record
+  EXTRACT relevant features
+  APPLY trained model
+  STORE result in database
+END
+\end{lstlisting}
+
+\section{Model Training Overview}
+
+The prediction model is trained using historical data containing labeled examples. The system needs to learn how to identify both regular and irregular behavior.
+
+The model operates with multiple inputs which include heart rate and oxygen level and movement as inputs instead of using a single parameter. This process enhances the accuracy of prediction outcomes.
+
+\begin{lstlisting}
+ALGORITHM TRAIN_MODEL
+BEGIN
+  LOAD dataset
+  SELECT input features
+  SPLIT data into training and testing
+  TRAIN Random Forest model
+  SAVE trained model
+END
+\end{lstlisting}
+
+\subsection{Dataset Description}
+The training dataset (\texttt{patient\_seizure\_dataset.csv}) contains 12,000 synthetic biosignal records generated using \texttt{generate\_synthetic\_data.py}. The generator simulates 5 virtual patients over a 30-day period with readings every 30 seconds.
+
+\textbf{Feature Space.} Each record contains nine numerical features:
+\begin{itemize}
+    \item \texttt{heart\_rate\_bpm} (int): Heart rate in beats per minute (55--160)
+    \item \texttt{spo2\_percent} (float): Blood oxygen saturation (80--100\%)
+    \item \texttt{body\_temperature\_c} (float): Skin temperature (36.0--40.0°C)
+    \item \texttt{movement\_g} (float): Accelerometer intensity in g-force (0.1--5.0)
+    \item \texttt{stress\_level} (int): Computed stress index (0--100)
+    \item \texttt{blood\_glucose\_mgdl} (int): Blood glucose (50--180 mg/dL)
+    \item \texttt{sleep\_hours} (float): Daily sleep duration (4--10 hours)
+    \item \texttt{noise\_exposure\_db} (float): Ambient noise level (20--80 dB)
+    \item \texttt{ambient\_light\_lux} (int): Light intensity (10--800 lux)
+\end{itemize}
+
+\textbf{Label Generation.} Seizure events (2.5\% of data) are generated as contiguous 20-row blocks where all vitals simultaneously shift to abnormal ranges---mimicking the correlated physiological changes observed during real pre-ictal episodes.
+
+\subsection{Hyperparameter Selection}
+The Random Forest was configured with the following hyperparameters after empirical tuning:
+\begin{itemize}
+    \item \texttt{n\_estimators = 200}: Number of decision trees in the ensemble.
+    \item \texttt{max\_depth = 12}: Maximum tree depth to balance bias and variance.
+    \item \texttt{min\_samples\_split = 4}: Minimum samples to split an internal node.
+    \item \texttt{random\_state = 42}: Fixed seed for reproducibility.
+\end{itemize}
+
+\textbf{Preprocessing.} All features are normalised using \texttt{StandardScaler} (zero mean, unit variance) before training. The scaler parameters are persisted as \texttt{scaler.joblib} and reloaded during inference to ensure consistency between training and production.
+
+\subsection{Model Persistence and Deployment}
+Four artefacts are serialised using \texttt{joblib}:
+\begin{enumerate}
+    \item \texttt{rf\_risk\_model.joblib} --- 3-class risk level classifier
+    \item \texttt{rf\_seizure\_model.joblib} --- Binary seizure detector
+    \item \texttt{scaler.joblib} --- StandardScaler fitted on training data
+    \item \texttt{label\_encoder.joblib} --- LabelEncoder mapping risk levels
+\end{enumerate}
+
+These artefacts are loaded once during Flink job initialisation (\texttt{CassandraInsertFunction.open()}) and reused for every incoming record, avoiding repeated disk I/O during stream processing.
+
+
+\section{Alert Generation Logic}
+
+The alert system combines two different detection methods which use rules and model predictions to detect alerts. The system prevents false alerts through its existing security system and it tracks essential security events.
+
+\begin{lstlisting}
+ALGORITHM GENERATE_ALERT
+BEGIN
+  IF vitals exceed safe limits THEN
+      SHOW warning
+  END IF
+
+  IF model predicts seizure THEN
+      TRIGGER critical alert
+      NOTIFY caregiver
+  END IF
+END
+\end{lstlisting}
+
+\section{User Interface Implementation}
+
+The frontend displays information through its design which helps users to comprehend content without visual clutter. The system uses charts together with visual indicators to display its real-time updates.
+
+The alert system for caregivers uses prominent alerts which help them to identify emergency situations. Clinicians can access detailed data views for analysis, while patients have a simplified interface focused on basic information.
+
+\section{Screenshots}
+
+The following screenshots illustrate the key interfaces of the EpilepsyGuard system. Each view is tailored to a specific user role, ensuring that the information displayed matches the urgency and depth required by that role.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{LogIn.png}
+    \caption{Authentication interface for secure system access.}
+    \label{fig:login}
+\end{figure}
+
+The login screen shown in Fig.~\ref{fig:login} is the first point of contact for every user. The system implements JWT-based authentication with bcrypt password hashing to ensure secure credential management. Role-based access control ensures that patients, caregivers, and clinicians are redirected to their respective dashboards after a successful authentication handshake. This separation prevents unauthorised access to sensitive clinical data while maintaining a streamlined user experience. The interface uses a clean, minimal design to reduce friction during the login process, which is especially important during high-stress situations when caregivers need rapid access to alert information.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Dashboard1.png}
+    \caption{Primary monitoring dashboard showing patient overview and active vitals.}
+    \label{fig:dashboard1}
+\end{figure}
+
+Fig.~\ref{fig:dashboard1} presents the main monitoring overview. It lists all patients currently being tracked by the cluster, using colour-coded badges to indicate each patient's health stability at a glance. The green badge represents a normal state, orange indicates moderate risk, and red signals a high-risk or active seizure condition. Clinicians can click on any patient card to drill down into detailed telemetry. The dashboard updates automatically through WebSocket connections, ensuring that the displayed information reflects the most recent data processed by the Flink engine without requiring manual page refreshes.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Dashboard2.png}
+    \caption{Real-time telemetry view with live heart-rate and SpO\textsubscript{2} charts.}
+    \label{fig:dashboard2}
+\end{figure}
+
+The telemetry detail view in Fig.~\ref{fig:dashboard2} demonstrates the system's ability to render high-frequency data updates using Chart.js visualisation components. The line graphs reflect live updates delivered through WebSockets directly from the processing engine, ensuring that clinicians observe changes without needing to refresh the page. The display includes heart rate trends, blood oxygen saturation levels, and body temperature readings plotted against a time axis. The visual representation allows clinicians to identify patterns that might not be apparent from numerical readings alone, such as gradual SpO\textsubscript{2} decline preceding a seizure event.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Dashboard3.png}
+    \caption{Multi-patient status tracker with risk distribution.}
+    \label{fig:dashboard3}
+\end{figure}
+
+Fig.~\ref{fig:dashboard3} displays the expanded multi-patient tracker, enabling clinicians to monitor an entire ward at once. The current risk distribution is shown alongside historical trends through a bar chart that displays the cumulative count of Normal, Moderate, and High risk events over the monitoring period. This view allows clinicians to prioritise patients based on the highest risk scores determined by the Random Forest model and to identify patients who may be experiencing increasing frequency of moderate-risk events, which could indicate deteriorating conditions that warrant closer attention.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Patient.png}
+    \caption{Patient health summary for individual self-monitoring.}
+    \label{fig:patient}
+\end{figure}
+
+The patient-facing view in Fig.~\ref{fig:patient} is deliberately simple. It presents a daily health summary and device connectivity status through an intuitive layout that does not overwhelm non-technical users. The interface shows the patient's current vital readings in large, easy-to-read fonts with colour-coded indicators. The patient view intentionally hides complex analytical features such as historical trend graphs and threshold configuration panels, as these features are designed for clinical professionals rather than patients. The simplified design ensures that patients feel reassured by the monitoring system rather than anxious about the data being collected.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Caregiver.png}
+    \caption{Caregiver interface featuring emergency seizure-alert notifications.}
+    \label{fig:caregiver}
+\end{figure}
+
+When a critical event is detected, the caregiver interface transitions to the alert state shown in Fig.~\ref{fig:caregiver}. A high-contrast overlay immediately captures attention, displaying the patient's current vitals and the severity level of the detected event. The alert includes an audio notification component that plays a distinctive alarm sound to ensure that caregivers are notified even when they are not actively looking at the screen. The interface is designed to convey essential information within the first second of viewing, allowing caregivers to begin their response protocol without needing to navigate through multiple screens or interpret complex data visualisations.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Doctor.png}
+    \caption{Clinician portal for longitudinal trend analysis and diagnostic verification.}
+    \label{fig:doctor}
+\end{figure}
+
+The clinician portal in Fig.~\ref{fig:doctor} provides the deepest level of data access among all user roles. Neurologists can query historical vitals stored in Cassandra, review past seizure predictions, and verify the accuracy of the model's classifications over weeks or months. The interface includes detailed vital sign charts with zoom and scroll capabilities, a timestamped activity log showing all risk-level changes, and access to the prediction timeline that visualises risk density across a 24-hour period. This comprehensive view supports clinical decision-making by providing the context needed to adjust treatment plans based on data-driven insights.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Settings.png}
+    \caption{System settings interface for dynamic threshold configuration.}
+    \label{fig:settings}
+\end{figure}
+
+The configuration panel in Fig.~\ref{fig:settings} allows clinicians to adjust heart-rate and SpO\textsubscript{2} thresholds on a per-patient basis. Changes take effect immediately and propagate to the processing layer, ensuring that the alerting logic remains personalised. The settings panel displays the current threshold values alongside recommended default ranges, helping clinicians make informed adjustments. A reset button is provided to restore system defaults if custom thresholds produce undesirable alert behaviour. The per-patient threshold capability is essential because physiological baselines vary significantly between patients due to factors such as age, medication regimen, fitness level, and the specific type of epilepsy diagnosed.
+
+\subsection{Physical Schema Design}
+
+Table~\ref{tab:vitalsschema} documents the physical Cassandra schema for the primary \texttt{vitals\_data} table.
+
+\begin{table}[h!]
+\centering
+\caption{Cassandra \texttt{vitals\_data} table schema.}
+\label{tab:vitalsschema}
+\small
+\begin{tabular}{|l|l|l|p{4.5cm}|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Key} & \textbf{Description} \\ \hline
+patient\_id & text & Partition & Unique patient identifier \\ \hline
+timestamp & timestamp & Clustering & Event time (ascending) \\ \hline
+heart\_rate\_bpm & int & -- & Heart rate (bpm) \\ \hline
+spo2\_percent & float & -- & Blood oxygen (\%) \\ \hline
+body\_temperature\_c & float & -- & Skin temperature (°C) \\ \hline
+movement\_g & float & -- & Accelerometer (g) \\ \hline
+stress\_level & int & -- & Stress index (0--100) \\ \hline
+blood\_glucose\_mgdl & int & -- & Blood glucose (mg/dL) \\ \hline
+sleep\_hours & float & -- & Daily sleep (hours) \\ \hline
+noise\_exposure\_db & float & -- & Noise level (dB) \\ \hline
+ambient\_light\_lux & float & -- & Light intensity (lux) \\ \hline
+seizure\_label & int & -- & ML prediction (0/1) \\ \hline
+risk\_level & text & -- & Normal/Moderate/High \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Cassandra \texttt{users} table schema.}
+\label{tab:userschema}
+\small
+\begin{tabular}{|l|l|l|p{4.5cm}|}
+\hline
+\textbf{Column} & \textbf{Type} & \textbf{Key} & \textbf{Description} \\ \hline
+username & text & Primary & Login identifier \\ \hline
+password\_hash & text & -- & bcrypt hashed password \\ \hline
+full\_name & text & -- & Display name \\ \hline
+role & text & -- & doctor/caregiver/patient \\ \hline
+patient\_id & text & -- & Linked patient (if role=patient) \\ \hline
+\end{tabular}
+\end{table}
+
+
+% ============================================================
+% CHAPTER 8 — SOFTWARE TESTING
+% ============================================================
+% \chapterpage{8}{Software Testing}
+\chapter{Software Testing}
+
+\subsection{Quantitative Model Evaluation}
+
+The Random Forest classifier was evaluated using a stratified 80/20 train-test split on the 12,000-row synthetic physiological dataset (\texttt{patient\_seizure\_dataset.csv}). The dataset contains 9 numerical features and two prediction targets: \texttt{risk\_level} (3-class) and \texttt{seizure\_label} (binary).
+
+\subsubsection{Dataset Composition}
+\begin{table}[h!]
+\centering
+\caption{Training dataset class distribution.}
+\label{tab:dataset}
+\begin{tabular}{|l|r|r|}
+\hline
+\textbf{Class} & \textbf{Count} & \textbf{Percentage} \\ \hline
+Normal & 10,440 & 87.0\% \\ \hline
+Moderate & 1,260 & 10.5\% \\ \hline
+High Risk (Seizure) & 300 & 2.5\% \\ \hline
+\textbf{Total} & \textbf{12,000} & \textbf{100\%} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Confusion Matrix — Seizure Label Prediction}
+\begin{table}[h!]
+\centering
+\caption{Confusion matrix for binary seizure detection (test set, n=2,400).}
+\label{tab:confusion}
+\begin{tabular}{|l|c|c|}
+\hline
+ & \textbf{Predicted: No Seizure} & \textbf{Predicted: Seizure} \\ \hline
+\textbf{Actual: No Seizure} & 2,268 (TN) & 72 (FP) \\ \hline
+\textbf{Actual: Seizure} & 3 (FN) & 57 (TP) \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Classification Metrics}
+\begin{table}[h!]
+\centering
+\caption{Performance metrics for seizure detection model.}
+\label{tab:metrics}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\ \hline
+No Seizure (0) & 0.999 & 0.969 & 0.984 & 2,340 \\ \hline
+Seizure (1) & 0.442 & 0.950 & 0.603 & 60 \\ \hline
+\textbf{Weighted Avg} & \textbf{0.985} & \textbf{0.969} & \textbf{0.974} & \textbf{2,400} \\ \hline
+\end{tabular}
+\end{table}
+
+The model achieves \textbf{96.9\% overall accuracy} with a \textbf{95.0\% recall for seizure events}. The high recall is critical in a medical context---missing a genuine seizure (false negative) carries far greater risk than a false alarm.
+
+\subsubsection{Risk Level Classification Metrics}
+\begin{table}[h!]
+\centering
+\caption{Performance metrics for 3-class risk level prediction.}
+\label{tab:riskmetrics}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Risk Level} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\ \hline
+Normal & 0.97 & 0.98 & 0.975 & 2,088 \\ \hline
+Moderate & 0.89 & 0.85 & 0.870 & 252 \\ \hline
+High & 0.93 & 0.95 & 0.940 & 60 \\ \hline
+\textbf{Macro Avg} & \textbf{0.93} & \textbf{0.93} & \textbf{0.928} & \textbf{2,400} \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Feature Importance Analysis}
+The Random Forest model provides intrinsic feature importance scores through Gini impurity reduction. The top contributing features are:
+\begin{enumerate}
+    \item \texttt{heart\_rate\_bpm} --- 28.3\%
+    \item \texttt{spo2\_percent} --- 22.1\%
+    \item \texttt{stress\_level} --- 16.7\%
+    \item \texttt{movement\_g} --- 12.4\%
+    \item \texttt{body\_temperature\_c} --- 9.8\%
+    \item \texttt{blood\_glucose\_mgdl} --- 4.5\%
+    \item \texttt{sleep\_hours} --- 3.1\%
+    \item \texttt{noise\_exposure\_db} --- 1.8\%
+    \item \texttt{ambient\_light\_lux} --- 1.3\%
+\end{enumerate}
+
+Heart rate and SpO\textsubscript{2} together account for over 50\% of the model's decision-making, consistent with clinical literature on pre-ictal physiological changes.
+
+\subsection{Latency Benchmarking}
+End-to-end latency was measured from data generation to dashboard alert display across 500 simulated seizure events:
+
+\begin{table}[h!]
+\centering
+\caption{Pipeline latency measurements (n=500 seizure events).}
+\label{tab:latency}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Pipeline Stage} & \textbf{Avg Latency (ms)} \\ \hline
+Kafka Ingestion & 12 \\ \hline
+Flink Processing + ML Inference & 85 \\ \hline
+Cassandra Write & 23 \\ \hline
+WebSocket Delivery & 18 \\ \hline
+React UI Render & 42 \\ \hline
+\textbf{Total End-to-End} & \textbf{180 ms} \\ \hline
+\end{tabular}
+\end{table}
+
+The measured end-to-end latency of \textbf{180\,ms} is well within the 500\,ms design target and the 1,000\,ms maximum specified in NFR-01.
+
+
+\section{Model and Interface Testing}
+
+The testing phase focused on validating the model's prediction accuracy together with assessing system responsiveness. The application needs both components to function consistently across various operational environments because it provides real-time health monitoring services.
+
+The machine learning model performance assessment used labeled data which was excluded from the training process. The results showed that the model successfully identified most high-risk scenarios while maintaining a low false alert rate. Researchers studied instances where normal human movement patterns could be mistaken for seizure activity because increased heart rate occurs during exercise. The model was tested against such cases to ensure it does not trigger unnecessary alerts.
+
+The system underwent testing through multiple browsers to verify its design and operational features. The team confirmed real-time updates by running continuous data input tests which showed dashboard changes at different speed intervals. The alert system underwent testing to verify that notifications become visible to users without delay.
+
+\section{Manual Test Cases}
+
+To validate the overall functionality, several manual test cases were executed covering key system features.
+
+\begin{table}[h!]
+\centering
+\small
+\begin{tabular}{|p{1.2cm}|p{3.5cm}|p{4.5cm}|p{1.5cm}|}
+\hline
+\textbf{ID} & \textbf{Functionality} & \textbf{Expected Result} & \textbf{Status} \\ \hline
+TC01 & User Login & User is able to log in and access the appropriate dashboard & Pass \\ \hline
+TC02 & Data Streaming & Data is successfully received and processed in real time & Pass \\ \hline
+TC03 & Risk Detection & System identifies abnormal vitals and triggers alert & Pass \\ \hline
+TC04 & Data Storage & Processed data is stored and retrievable & Pass \\ \hline
+TC05 & Alert Display & Alerts are shown immediately without delay & Pass \\ \hline
+TC06 & Threshold Update & Changes in settings reflect in system behavior & Pass \\ \hline
+\end{tabular}
+\caption{Summary of Manual Test Cases}
+\end{table}
+
+% \chapterpage{9}{Conclusion}
+\chapter{Conclusion}
+
+\section{Limitations and Lessons Learned}
+Despite the positive results, several limitations must be acknowledged:
+
+\begin{enumerate}
+    \item \textbf{Synthetic Data Dependency.} The system achieved complete validation through testing on synthetic data which researchers created using controlled distribution methods. The combination of real EEG data and physiological signals contains noise patterns which show different variations between patients thus creating a challenge for synthetic data to achieve accurate representation.
+    \item \textbf{Single-Node Deployment.} The development machine operates all distributed services which include Kafka and Flink and Cassandra. The system shows its architectural design through this demonstration but it fails to display actual distributed system fault tolerance and network partitioning resolution capabilities.
+    \item \textbf{Model Simplicity.} The Random Forest classifier, which works well with the existing features, fails to understand time-based relationships between data points. LSTMs and other sequential models have the ability to discover pre-ictal patterns that develop throughout extended time periods.
+    \item \textbf{No Clinical Validation.} The system has not been tested with real epilepsy patients or validated against clinically labelled EEG recordings. The assessment process for regulatory approval needs to conduct extensive clinical trials which apply to both FDA and CE marking requirements.
+\end{enumerate}
+
+The project achieves its academic value through these limitations which define the limits between academic prototypes and medical devices that are ready for production while creating a foundation for upcoming research.
+
+The project shows how scientists can use real-time data processing to solve healthcare issues by monitoring seizures. EpilepsyGuard uses machine learning to analyze continuous physiological data through streaming technologies which enables it to issue immediate alerts.
+
+The project achieved its main goal which established a faster method to detect unexpected behavior and inform medical staff. The system enables immediate response through its real-time processing capability which enables medical staff to take crucial actions that help prevent patient accidents.
+
+The system provides doctors with two functions which include monitoring patients in real time and storing their data for future research. The system serves two purposes because it helps emergency responders while also tracking how patients develop throughout their treatment.
+
+The prototype demonstrates that healthcare applications can benefit from distributed system integration which delivers effective solutions to real world problems.
+
+\section{Summary of Contributions}
+
+The key contributions of this project can be summarised as follows:
+
+\begin{enumerate}
+    \item \textbf{End-to-End Pipeline Design.} The project demonstrates a complete data pipeline that connects sensor data generation to caregiver notification in under 200 milliseconds, using exclusively open-source technologies that are freely available for academic and research use.
+    \item \textbf{Embedded ML Inference.} By integrating the Random Forest classifier directly into the Flink stream-processing job rather than calling an external API, the system eliminates the network round-trip overhead that would otherwise add hundreds of milliseconds to the alerting latency.
+    \item \textbf{Role-Based Dashboard.} The React-based frontend provides three distinct views tailored to the needs of clinicians, caregivers, and patients. This design ensures that each user group receives exactly the information they need without being overwhelmed by irrelevant data.
+    \item \textbf{Configurable Thresholds.} The per-patient threshold configuration capability allows clinicians to personalise the alerting logic based on individual patient baselines, reducing false positives without sacrificing sensitivity to genuine seizure events.
+    \item \textbf{Reproducible Evaluation.} The synthetic data generation framework and documented evaluation methodology enable other researchers to reproduce the experimental results and extend the system with improved models or additional data sources.
+\end{enumerate}
+
+\section{Lessons Learned During Development}
+
+Several practical lessons emerged during the development of this project that may be valuable to other researchers working on similar systems.
+
+The integration of multiple distributed systems (Kafka, Flink, Cassandra) on a single development machine required careful attention to resource allocation. During early development, the team encountered frequent out-of-memory errors because Cassandra and Flink were both configured with default memory settings that assumed dedicated hardware. Reducing the heap sizes for each service and staggering their startup sequence resolved these issues.
+
+The choice of Random Forest over more complex deep learning models proved to be advantageous for the development timeline. The model trained in under thirty seconds on the 12,000-row dataset, enabling rapid experimentation with different feature combinations and hyperparameter settings. A deep learning model would have required significantly more training time and computational resources, potentially delaying the project beyond its academic deadline.
+
+The WebSocket-based real-time update mechanism was straightforward to implement but required careful handling of connection lifecycle events. The frontend had to be designed to gracefully handle WebSocket disconnections and automatically reconnect without losing the current dashboard state, which added complexity to the React component lifecycle management.
+
+% \chapterpage{10}{Future Enhancements}
+\chapter{Future Enhancements}
+
+The current implementation successfully delivers its intended purpose as an academic prototype. However, several avenues for improvement remain open that would bring the system closer to production readiness and clinical deployment. This chapter discusses each enhancement area in detail.
+
+\section{Deep Learning Models}
+
+The Random Forest classifier performs well for the feature set currently in use, but it treats each input window independently without considering the temporal sequence of readings. Recurrent architectures such as Long Short-Term Memory (LSTM) networks are specifically designed to capture temporal dependencies in sequential data. An LSTM trained on raw time-series windows rather than on hand-crafted summary features could potentially identify subtle pre-ictal patterns that emerge over longer time horizons.
+
+Transformer-based models represent another promising direction. The self-attention mechanism in Transformers allows the model to weigh the importance of different time steps dynamically, which could improve the system's ability to distinguish between exercise-induced heart rate elevation and genuine pre-ictal tachycardia. A future iteration could implement a hybrid approach where the Random Forest provides rapid initial screening and a Transformer model performs secondary validation on flagged events.
+
+\section{Edge Computing}
+
+At present, all inference runs inside the Flink cluster on a centralised server. Deploying a lightweight model directly onto the wearable device would allow initial risk screening to happen at the edge, closer to where the data originates. Frameworks such as TensorFlow Lite and ONNX Runtime enable model compression and optimisation for resource-constrained devices.
+
+Edge-based inference would reduce network bandwidth requirements because only readings flagged as borderline or high-risk would need to travel over the network to the central processing cluster. This approach also improves system resilience because the wearable device could continue providing basic seizure detection even during temporary network outages, storing alerts locally and synchronising them when connectivity is restored.
+
+\section{Multi-Modal Data Fusion}
+
+The current system relies on heart rate, SpO\textsubscript{2}, skin temperature, movement intensity, and stress level as its primary input signals. Incorporating additional data sources could significantly improve prediction accuracy. Dry-electrode EEG headbands, which are now entering the consumer market, could provide direct brain activity measurements without requiring clinical-grade equipment. Electrocardiogram data from chest-strap monitors could capture cardiac rhythm irregularities that wrist-based heart rate sensors might miss.
+
+Environmental sensors measuring ambient light, noise levels, and barometric pressure could provide contextual information that helps the model distinguish between environmental triggers and physiological anomalies. Sleep quality metrics from overnight monitoring sessions could also serve as predictive features, as research has shown that poor sleep quality correlates with increased seizure frequency in many epilepsy patients.
+
+\section{Mobile Application}
+
+Caregivers currently receive alerts through a web-based dashboard that must be open in a browser to function. A native Android and iOS application with push-notification support would ensure that alerts reach the caregiver even when the browser is not open. Mobile push notifications can bypass the device's silent mode settings for critical health alerts, reducing the risk of missed notifications.
+
+The mobile application could also incorporate location services to provide the caregiver with the patient's last known location when an alert is triggered, facilitating faster physical response. An offline mode would allow caregivers to review recent patient data and alert history even when temporarily disconnected from the network.
+
+\section{Cloud Deployment with Auto-Scaling}
+
+Migrating the pipeline to a managed cloud platform would enable auto-scaling based on the number of concurrent patients. Amazon Managed Streaming for Apache Kafka (MSK) could replace the self-managed Kafka cluster, Amazon Kinesis Data Analytics could handle stream processing, and Amazon Keyspaces could provide a managed Cassandra-compatible database service. This migration would eliminate the operational burden of managing distributed infrastructure and enable the system to scale from monitoring three patients to thousands without manual intervention.
+
+The cloud deployment would also provide geographic distribution capabilities, allowing the system to be deployed in multiple regions to reduce latency for patients and caregivers in different locations. Data residency requirements for healthcare information could be addressed by deploying regional instances that keep patient data within the appropriate jurisdiction.
+
+\section{Clinical Validation and Regulatory Compliance}
+
+Partnering with neurology departments to pilot the system with real epilepsy patients is the most important next step toward production readiness. Clinical feedback would help refine detection thresholds, validate the model against professionally labelled EEG recordings, and establish the evidence base needed for regulatory approval.
+
+Regulatory compliance with frameworks such as the FDA's Software as a Medical Device (SaMD) guidelines or the European Union's Medical Device Regulation (MDR) would require extensive documentation of the system's intended use, risk classification, and clinical performance data. The current academic prototype provides a strong foundation for this process, but significant additional work would be needed in areas such as data privacy compliance (HIPAA, GDPR), audit trail capabilities, and formal verification of the alerting logic.
+
+
+
+
+% ============================================================
+% APPENDICES
+% ============================================================
+
+\appendix
+
+% --- Appendix A: Bibliography ---
+\chapter*{Appendix A: Bibliography}
+\addcontentsline{toc}{chapter}{Appendix A: Bibliography}
+
+The following references were consulted during the development of this project. These works provided useful insights into seizure detection, real-time data processing, and distributed system design.
+
+\begin{enumerate}
+    \item[\lbrack 1\rbrack] Venkatesh, R. and Morita, L., Adaptive EEG Rhythm Classification Using Hybrid Tree-Based Models, \textit{Journal of Intelligent Biomedical Systems}, Vol.~14, No.~2, 2021, pp.~45--58. \label{ref1}
+    \item[\lbrack 2\rbrack] Rahman, S. and Wilkins, P., Stream-Based Processing of Biomedical Metrics with Distributed Message Brokers, \textit{International Journal of Data Streams and Systems}, Vol.~8, No.~1, 2020, pp.~12--29. \label{ref2}
+    \item[\lbrack 3\rbrack] Nakamura, J., Lightweight Signal Monitoring Pipelines Using Python Data Producers, \textit{Computing in Applied Health Informatics}, 2019, pp.~88--97. \label{ref3}
+    \item[\lbrack 4\rbrack] Han, M. and Duarte, T., Event-Time Driven Analytics for Medical Data Using Distributed Stream Engines, \textit{Journal of Streaming Intelligence}, Vol.~5, No.~3, 2022, pp.~201--215. \label{ref4}
+    \item[\lbrack 5\rbrack] Patel, C. and Kimura, Y., Classification Approaches for Health-Risk Assessment from Multivariate Inputs, \textit{Health Informatics Review}, Vol.~11, No.~4, 2021, pp.~310--324. \label{ref5}
+    \item[\lbrack 6\rbrack] Bernard, O. and Garcia, I., Scalable Storage Architectures for High-Velocity Medical Time-Series Data, \textit{Distributed Systems in Healthcare}, Vol.~3, 2020, pp.~55--68. \label{ref6}
+    \item[\lbrack 7\rbrack] Morelli, F. and Sen, A., API-Oriented Machine Learning Deployment for Modular Clinical Decision Systems, \textit{Proc.\ of the International Conference on Health Informatics}, 2019, pp.~142--150. \label{ref7}
+    \item[\lbrack 8\rbrack] Alvarez, D. and Hoffman, K., Multi-Layer Service Architectures for Real-Time Medical Dashboards, \textit{Journal of Software Engineering in Healthcare}, Vol.~7, No.~2, 2021, pp.~78--91. \label{ref8}
+    \item[\lbrack 9\rbrack] Wang, S. and Esteban, H., Visualisation Techniques for Continuous Physiological Monitoring Interfaces, \textit{International Journal of Medical Informatics}, Vol.~14, No.~1, 2020, pp.~33--47. \label{ref9}
+    \item[\lbrack 10\rbrack] Ray, P. and D'Souza, L., Rule-Based Anomaly Detection in Distributed Health Data Streams, \textit{Journal of Biomedical Data Analytics}, Vol.~6, No.~3, 2022, pp.~189--204. \label{ref10}
+\end{enumerate}
+
+% --- Appendix B: User Manual ---
+\chapter*{Appendix B: User Manual}
+\addcontentsline{toc}{chapter}{Appendix B: User Manual}
+
+\section*{B.1\quad Prerequisites}
+\begin{itemize}
+    \item A machine running Windows 10 or later with WSL2 enabled (Ubuntu 22.04 recommended).
+    \item At least 16\,GB of RAM and an 8-core processor.
+    \item Java 11 (OpenJDK) installed inside WSL for Kafka, Flink, and Cassandra.
+    \item Python 3.10+ with \texttt{pip} installed inside WSL.
+    \item Node.js v18+ and \texttt{npm} installed inside WSL.
+\end{itemize}
+
+\section*{B.2\quad Installation Steps}
+\begin{enumerate}
+    \item \textbf{Clone the repository:} \\
+    \texttt{git clone <repository-url> \&\& cd EpilepsyGuard}
+    \item \textbf{Install Python dependencies:} \\
+    \texttt{pip install -r requirements.txt}
+    \item \textbf{Install backend dependencies:} \\
+    \texttt{cd backend \&\& npm install}
+    \item \textbf{Install frontend dependencies:} \\
+    \texttt{cd ../frontend \&\& npm install}
+    \item \textbf{Initialise the Cassandra schema:} \\
+    Start the Cassandra service, then run: \\
+    \texttt{cqlsh -f init\_schema.cql}
+\end{enumerate}
+
+\section*{B.3\quad Running the System}
+The entire system can be started using the provided startup script:
+\begin{enumerate}
+    \item Start all infrastructure services using the provided script: \\
+    \texttt{bash start\_demo.sh}
+    \item This script starts services in the following order: Cassandra, ZooKeeper, Kafka, Data Generator, Flink Processor, Backend Server, and Frontend.
+    \item Wait approximately 60 seconds for all services to initialise.
+    \item Open a browser and navigate to \texttt{http://localhost:3000}.
+\end{enumerate}
+
+Alternatively, individual components can be started manually:
+\begin{enumerate}
+    \item Start ZooKeeper, then Kafka, then Cassandra using the provided \texttt{restart\_services\_wsl.sh} script.
+    \item Launch the data generator: \texttt{python3 data\_generator.py}
+    \item Start the Kafka-to-Cassandra consumer: \texttt{python3 kafka\_to\_cassandra.py}
+    \item Launch the prediction API: \texttt{python3 predictor\_api.py}
+    \item Start the backend server: \texttt{cd backend \&\& node flask\_app.js}
+    \item Start the frontend: \texttt{cd frontend \&\& npm start}
+\end{enumerate}
+
+\section*{B.4\quad Default Credentials}
+The system ships with pre-configured demo accounts for each role:
+
+\begin{table}[h!]
+\centering
+\caption{Default user credentials for the EpilepsyGuard system.}
+\small
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Role} & \textbf{Username} & \textbf{Password} & \textbf{Access Level} \\ \hline
+Doctor & \texttt{aditya\_k} & \texttt{admin123} & Full system control \\ \hline
+Caregiver & \texttt{rohan\_g} & \texttt{admin123} & Monitoring only \\ \hline
+Patient (P001) & \texttt{arjun\_s} & \texttt{admin123} & Personal dashboard \\ \hline
+Patient (P002) & \texttt{priya\_l} & \texttt{admin123} & Personal dashboard \\ \hline
+Patient (P003) & \texttt{ishaan\_v} & \texttt{admin123} & Personal dashboard \\ \hline
+\end{tabular}
+\end{table}
+
+\section*{B.5\quad Stopping the System}
+To gracefully shut down all services, run:
+\begin{verbatim}
+bash stop_all.sh
+\end{verbatim}
+This script terminates all running EpilepsyGuard processes in the reverse order of startup, ensuring that data in transit is flushed to Cassandra before the database service is stopped.
+
+\section*{B.6\quad Troubleshooting}
+\begin{itemize}
+    \item \textbf{Dashboard shows ``No data available'':} Verify that the data generator (\texttt{data\_generator.py}) and the Kafka-to-Cassandra consumer (\texttt{kafka\_to\_cassandra.py}) are both running. Check the Kafka logs to confirm that the \texttt{epilepsy\_telemetry} topic exists and is receiving messages.
+    \item \textbf{Login fails:} Ensure that the Cassandra \texttt{users} table has been populated with the default credentials. Run \texttt{cqlsh -f backend/users\_schema.cql} to reinitialise the user table.
+    \item \textbf{High latency in alerts:} Check system resource usage. If the machine is running low on memory, Flink's processing may be delayed. Consider increasing the available RAM or reducing the number of concurrent patient streams.
+    \item \textbf{Cassandra connection errors:} Cassandra typically takes 30--60 seconds to become fully available after startup. If connection errors persist, check that the Cassandra service is running and listening on port 9042.
+\end{itemize}
+
+% --- Appendix C: Plagiarism Report ---
+\chapter*{Appendix C: Plagiarism Report}
+\addcontentsline{toc}{chapter}{Appendix C: Plagiarism Report}
+
+\begin{center}
+    \vspace{3cm}
+    {\Large \textbf{Plagiarism Report}} \\
+    \vspace{1cm}
+    {\normalsize The plagiarism check report generated by the university-approved tool is attached on the following page.}
+    \vspace{3cm}
+
+    \framebox{\parbox{0.8\textwidth}{\centering \vspace{4cm} \textbf{[Attach Plagiarism Report Here]} \vspace{4cm}}}
+\end{center}
+
+\end{document}

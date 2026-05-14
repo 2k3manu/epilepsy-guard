@@ -4,7 +4,7 @@
 
 **Author:** _Manu N M (PES1PG24CA269)_  
 **Guide:** _Mr. Dilip Kumar Maripuri, Associate Professor_  
-**Version:** _2.2.0-FINAL_
+**Version:** _2.2.1-FINAL_
 
 ---
 
@@ -204,6 +204,12 @@ EpilepsyGuard/
 │   │   └── utils/
 │   │       └── ReportGenerator.js  # jsPDF clinical report generator
 │   └── package.json
+├── reports/
+│   ├── Report_Plag.tex       # LaTeX source for Phase-2 report
+│   ├── report.tex            # LaTeX source (alternate version)
+│   ├── Final Report.pdf      # Compiled final submission PDF
+│   ├── Screenshots/          # Dashboard & system screenshots
+│   └── Diagrams/             # Architecture & flow diagrams
 ├── data_generator.py         # Kafka producer (3 patients, 3sec intervals)
 ├── direct_cassandra_generator.py  # Direct Cassandra data insertion
 ├── kafka_to_cassandra.py     # Standalone Kafka → Cassandra consumer
@@ -211,7 +217,7 @@ EpilepsyGuard/
 ├── train_rf.py               # Random Forest model training
 ├── generate_synthetic_data.py # 12K-row synthetic dataset generator
 ├── predictor_api.py          # Standalone Flask ML API (port 8000)
-├── import_real_data.py       # Kaggle dataset importer
+├── import_real_data.py        # Kaggle dataset importer
 ├── init_schema.cql           # Cassandra keyspace & vitals_data schema
 ├── start_demo.sh             # Full pipeline startup script
 ├── restart_services_wsl.sh   # Quick restart script
@@ -226,11 +232,21 @@ EpilepsyGuard/
 
 ---
 
+## 📑 Reports & Documentation
+
+- **Phase-1 Report** — `reports/Phase 1.pdf`
+- **Phase-2 Final Report** — `reports/Final Report.pdf`
+- **LaTeX Source** — `reports/Report_Plag.tex` (primary), `reports/report.tex` (alternate)
+- **Architecture Diagram** — `architecture Diagram.png`
+- **Plagiarism Report** — `reports/Plagiarism.png`
+
+---
+
 ## 📜 License
 
 Open-source for educational use.
 
 ---
 
-**Last Updated:** April 2, 2026  
-**Status:** 🚀 2.2.0-FINAL Released
+**Last Updated:** May 14, 2026  
+**Status:** 🚀 2.2.1-FINAL — Capstone Phase-2 Submission Complete

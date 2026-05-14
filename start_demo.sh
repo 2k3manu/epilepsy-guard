@@ -55,4 +55,4 @@ cd ..
 echo "[DONE] Starting Frontend (React)..."
 cd frontend
 # npm install --silent # Already installed
-nohup npm start > frontend.log 2>&1 &
+HOST=0.0.0.0 nohup npm start > frontend.log 2>&1 &
